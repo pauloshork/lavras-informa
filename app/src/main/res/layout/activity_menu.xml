@@ -100,7 +100,7 @@
                             android:layout_alignParentTop="true"
                             android:layout_column="1"
                             android:layout_weight="1"
-                    android:backgroundTint="@color/azul" />
+                    android:onClick="logout" />
         </LinearLayout>
 
 </LinearLayout>

@@ -11,40 +11,23 @@ import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.internal.CallbackManagerImpl;
+import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 
 public class LoginActivity extends AppCompatActivity {
 
+    public static final int RESULT_SUCCESS = 1;
+    public static final int RESULT_CANCEL = 2;
+    public static final int RESULT_ERROR = 3;
     private CallbackManager callbackManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        FacebookSdk.sdkInitialize(getApplicationContext());
-        AppEventsLogger.activateApp(getApplication());
 
         callbackManager = CallbackManager.Factory.create();
-
-        LoginButton btnLoginFacebook = (LoginButton) findViewById(R.id.btnLoginFacebook);
-
-        btnLoginFacebook.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
-            @Override
-            public void onSuccess(LoginResult loginResult) {
-                // TODO: Enviar dados para o webservice
-            }
-
-            @Override
-            public void onCancel() {
-
-            }
-
-            @Override
-            public void onError(FacebookException error) {
-                // TODO: Mostrar mensagem de erro para o usuário
-            }
-        });
     }
 
     @Override
@@ -53,7 +36,38 @@ public class LoginActivity extends AppCompatActivity {
         callbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
-    protected void login(View view) {
+    @Override
+    public void onBackPressed() {
+        setResult(RESULT_CANCEL);
+        super.onBackPressed();
+    }
+
+    public void login(View view) {
         // TODO: Pedir autorização ao webservice
+    }
+
+    public void loginFacebook(View view) {
+        LoginManager manager = LoginManager.getInstance();
+        manager.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+            @Override
+            public void onSuccess(LoginResult loginResult) {
+                setResult(RESULT_SUCCESS);
+                // TODO: Enviar dados para o webservice
+                finish();
+            }
+
+            @Override
+            public void onCancel() {
+                setResult(RESULT_CANCEL);
+            }
+
+            @Override
+            public void onError(FacebookException error) {
+                setResult(RESULT_ERROR);
+                error.printStackTrace();
+                // TODO: Mostrar mensagem de erro para o usuário
+            }
+        });
+        manager.logInWithReadPermissions(this, null);
     }
 }
