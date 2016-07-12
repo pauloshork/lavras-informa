@@ -8,99 +8,84 @@
     android:columnOrderPreserved="false"
     android:orientation="vertical">
 
-        <TextView
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Selecione uma das opções para começar"
+        android:id="@+id/textView"
+        android:gravity="center" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1">
+
+        <Button
             android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Relatar Problema"
+            android:id="@+id/btnRelatarProblema"
+            android:layout_weight="1"
+            android:background="@color/verdeEscuro"
+            android:onClick="relatarProblema" />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Meus Relatos"
+            android:id="@+id/btnMeusRelatos"
+            android:layout_weight="1"
+            android:background="@color/verdeClaro"
+            android:onClick="meusRelatos" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1">
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Todos os Relatos"
+            android:id="@+id/btnTodosRelatos"
+            android:background="@color/verdeOliva"
+            android:onClick="todosRelator"
+            android:layout_weight="1" />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Mapa de Relatos"
+            android:id="@+id/btnMapaRelatos"
+            android:layout_weight="1"
+            android:background="@color/beje"
+            android:onClick="mapaRelatos" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="1.2">
+
+        <Space
+            android:layout_width="fill_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <Button
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Selecione uma das opções para começar"
-            android:id="@+id/textView"
-            android:gravity="center" />
-
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1">
-
-                <Button
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:text="Relatar Problema"
-                    android:id="@+id/btnRelatarProblema"
-                    android:layout_alignParentTop="true"
-                    android:layout_alignParentLeft="true"
-                    android:layout_alignParentStart="true"
-                    android:layout_column="0"
-                    android:layout_weight="1"
-                    android:background="@color/verdeEscuro" />
-
-                <Button
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:text="Meus Relatos"
-                    android:id="@+id/btnMeusRelatos"
-                    android:layout_column="1"
-                    android:layout_weight="1"
-                    android:background="@color/verdeClaro" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1">
-
-                <Button
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:text="Todos os Relatos"
-                    android:id="@+id/btnTodosRelatos"
-                    android:layout_below="@+id/btnRelatarProblema"
-                    android:layout_alignParentLeft="true"
-                    android:layout_alignParentStart="true"
-                    android:layout_column="0"
-                    android:layout_weight="1"
-                    android:background="@color/verdeOliva" />
-
-                <Button
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:text="Mapa de Relatos"
-                            android:id="@+id/btnMapaRelatos"
-                            android:layout_below="@+id/btnMeusRelatos"
-                            android:layout_alignParentRight="true"
-                            android:layout_alignParentEnd="true"
-                            android:layout_column="1"
-                            android:layout_weight="1"
-                    android:background="@color/beje" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="fill_parent"
-            android:layout_weight="1.2">
-
-                <Space
-                    android:layout_width="fill_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1" />
-
-                <Button
-                            android:layout_width="fill_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Logout"
-                            android:id="@+id/btnLogout"
-                            android:layout_alignParentBottom="true"
-                            android:layout_alignParentRight="true"
-                            android:layout_alignParentEnd="true"
-                            android:layout_alignParentLeft="true"
-                            android:layout_alignParentTop="true"
-                            android:layout_column="1"
-                            android:layout_weight="1"
-                    android:onClick="logout" />
-        </LinearLayout>
+            android:text="Logout"
+            android:id="@+id/btnLogout"
+            android:layout_weight="1"
+            android:onClick="logout" />
+    </LinearLayout>
 
 </LinearLayout>
