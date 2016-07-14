@@ -16,14 +16,14 @@
         android:text="Bem vindo ao Lavras Informa"
         android:id="@+id/textView2"
         android:layout_marginBottom="85dp"
-        android:layout_above="@+id/button"
+        android:layout_above="@+id/btnEntrar"
         android:layout_centerHorizontal="true" />
 
     <Button
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:text="Entrar"
-        android:id="@+id/button"
+        android:id="@+id/btnEntrar"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
         android:onClick="entrar" />
@@ -32,8 +32,8 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:text="Cadastro"
-        android:id="@+id/button2"
-        android:layout_below="@+id/button"
+        android:id="@+id/btnCadastro"
+        android:layout_below="@+id/btnEntrar"
         android:layout_centerHorizontal="true"
         android:onClick="cadastro" />
 </RelativeLayout>

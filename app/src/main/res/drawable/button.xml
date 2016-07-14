@@ -1,58 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item>
-        <layer-list>
-            <item
-                android:top="@dimen/button_vertical_margin"
-                android:bottom="@dimen/button_vertical_margin"
-                android:left="@dimen/button_horizontal_margin"
-                android:right="@dimen/button_horizontal_margin">
-                <shape android:shape="rectangle">
-                    <padding
-                        android:bottom="@dimen/button_vertical_padding"
-                        android:top="@dimen/button_vertical_padding"
-                        android:left="@dimen/button_horizontal_padding"
-                        android:right="@dimen/button_horizontal_padding" />
-                    <stroke android:width="@dimen/button_stroke_width" android:color="@android:color/white" />
-                    <solid android:color="@color/azul"/>
-                </shape>
-            </item>
-        </layer-list>
-    </item>
-    <item android:state_selected="true">
-        <layer-list>
-            <item
-                android:top="@dimen/button_vertical_margin"
-                android:bottom="@dimen/button_vertical_margin"
-                android:left="@dimen/button_horizontal_margin"
-                android:right="@dimen/button_horizontal_margin">
-                <shape android:shape="rectangle">
-                    <padding
-                        android:bottom="@dimen/button_vertical_padding"
-                        android:top="@dimen/button_vertical_padding"
-                        android:left="@dimen/button_horizontal_padding"
-                        android:right="@dimen/button_horizontal_padding" />
-                    <stroke android:width="@dimen/button_stroke_width" android:color="@color/colorAccent" />
-                    <solid android:color="@color/azul"/>
-                </shape>
-            </item>
-        </layer-list>
-    </item>
     <item android:state_pressed="true">
         <layer-list>
             <item
-                android:top="@dimen/button_vertical_margin"
-                android:bottom="@dimen/button_vertical_margin"
-                android:left="@dimen/button_horizontal_margin"
-                android:right="@dimen/button_horizontal_margin">
+                android:top="@dimen/button.vertical_margin"
+                android:bottom="@dimen/button.vertical_margin"
+                android:left="@dimen/button.horizontal_margin"
+                android:right="@dimen/button.horizontal_margin">
                 <shape android:shape="rectangle">
                     <padding
-                        android:bottom="@dimen/button_vertical_padding"
-                        android:top="@dimen/button_vertical_padding"
-                        android:left="@dimen/button_horizontal_padding"
-                        android:right="@dimen/button_horizontal_padding" />
-                    <stroke android:width="@dimen/button_stroke_width" android:color="@android:color/darker_gray" />
-                    <solid android:color="@color/azul"/>
+                        android:bottom="@dimen/button.vertical_padding"
+                        android:top="@dimen/button.vertical_padding"
+                        android:left="@dimen/button.horizontal_padding"
+                        android:right="@dimen/button.horizontal_padding" />
+                    <stroke
+                        android:width="@dimen/button.stroke_width"
+                        android:color="@color/button.stroke.pressed" />
+                    <solid android:color="@color/button.background.pressed"/>
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+    <item android:state_pressed="false">
+        <layer-list>
+            <item
+                android:top="@dimen/button.vertical_margin"
+                android:bottom="@dimen/button.vertical_margin"
+                android:left="@dimen/button.horizontal_margin"
+                android:right="@dimen/button.horizontal_margin">
+                <shape android:shape="rectangle">
+                    <padding
+                        android:bottom="@dimen/button.vertical_padding"
+                        android:top="@dimen/button.vertical_padding"
+                        android:left="@dimen/button.horizontal_padding"
+                        android:right="@dimen/button.horizontal_padding" />
+                    <stroke
+                        android:width="@dimen/button.stroke_width"
+                        android:color="@color/button.stroke" />
+                    <solid android:color="@color/button.background"/>
                 </shape>
             </item>
         </layer-list>

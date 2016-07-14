@@ -5,6 +5,13 @@
     <color name="colorAccent">#FF4081</color>
 
     <color name="azul">#065075</color>
+    <color name="azulClareado">#78909c</color>
+
+    <color name="button.background">#00FFFFFF</color>
+    <color name="button.background.pressed">#6FFFFFFF</color>
+    <color name="button.stroke">#FFFFFFFF</color>
+    <color name="button.stroke.pressed">#8FFFFFFF</color>
+
     <color name="verdeEscuro">#28666E</color>
     <color name="verdeClaro">#7C9885</color>
     <color name="verdeOliva">#A3A27B</color>
