@@ -82,13 +82,26 @@ public class LoginActivity extends AppCompatActivity {
         manager.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(final LoginResult loginResult) {
-                Usuario usuario = new Usuario();
-                usuario.setToken(loginResult.getAccessToken().getToken());
+                String userId = loginResult.getAccessToken().getUserId();
+                String accessToken = loginResult.getAccessToken().getToken();
+                WebServiceConnector.getInstance().autenticarFacebook(LoginActivity.this, userId, accessToken, new Callback<Usuario>() {
+                    @Override
+                    public void onSuccess(Usuario usuario) {
+                        Intent resultado = new Intent();
+                        resultado.putExtra(EXTRA_USUARIO, usuario);
+                        setResult(RESULT_SUCCESS, resultado);
+                        finish();
+                    }
 
-                Intent resultado = new Intent();
-                resultado.putExtra(EXTRA_USUARIO, usuario);
-                setResult(RESULT_SUCCESS, resultado);
-                finish();
+                    @Override
+                    public void onCancel() {
+                    }
+
+                    @Override
+                    public void onError(Throwable error) {
+                        WebServiceConnector.mostrarDialogoErro(LoginActivity.this, error);
+                    }
+                });
             }
 
             @Override
@@ -97,10 +110,7 @@ public class LoginActivity extends AppCompatActivity {
 
             @Override
             public void onError(FacebookException error) {
-                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(LoginActivity.this);
-                dialogBuilder.setMessage(error.getLocalizedMessage());
-                dialogBuilder.setPositiveButton("OK", null);
-                dialogBuilder.show();
+                WebServiceConnector.mostrarDialogoErro(LoginActivity.this, error);
             }
         });
         manager.logInWithReadPermissions(this, Arrays.asList("public_profile", "email"));

@@ -16,12 +16,11 @@ import com.facebook.login.LoginManager;
 import br.ufla.lavrasinforma.model.Callback;
 import br.ufla.lavrasinforma.model.Usuario;
 import br.ufla.lavrasinforma.model.WebServiceConnector;
-import br.ufla.lavrasinforma.model.WebServiceException;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_LOGIN = 1;
-    private static final int REQUEST_REGISTRO = 2;
+    private static final int REQUEST_CADASTRO = 2;
 
     public static final String ACTION_LOGOUT = "logout";
 
@@ -48,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
         if (prefs.contains(SETTINGS_TOKEN)) {
             Log.d("login", "Token encontrado nas preferências");
             Usuario u = new Usuario();
-            u.setToken(prefs.getString(SETTINGS_TOKEN, null));
+            u.setAccessToken(prefs.getString(SETTINGS_TOKEN, null));
             logar(u);
         }
     }
@@ -56,35 +55,10 @@ public class MainActivity extends AppCompatActivity {
     private void logar(final Usuario usuario) {
         Log.d("login", "Logando no sistema");
 
-        WebServiceConnector.getInstance().autorizar(this, usuario, new Callback<Boolean>() {
-            @Override
-            public void onSuccess(Boolean aBoolean) {
-                if (aBoolean) {
-                    Intent menu = new Intent(MainActivity.this, MenuActivity.class);
-                    menu.putExtra(MenuActivity.EXTRA_USUARIO, usuario);
-                    startActivity(menu);
-                    finish();
-                } else {
-                    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(MainActivity.this);
-                    dialogBuilder.setMessage("Você não foi autorizado a fazer login no sistema.");
-                    dialogBuilder.setPositiveButton("OK", null);
-                    dialogBuilder.show();
-                }
-            }
-
-            @Override
-            public void onCancel() {
-            }
-
-            @Override
-            public void onError(Throwable error) {
-                deslogar();
-                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(MainActivity.this);
-                dialogBuilder.setMessage(error.getLocalizedMessage());
-                dialogBuilder.setPositiveButton("OK", null);
-                dialogBuilder.show();
-            }
-        });
+        Intent menu = new Intent(MainActivity.this, MenuActivity.class);
+        menu.putExtra(MenuActivity.EXTRA_USUARIO, usuario);
+        startActivity(menu);
+        finish();
     }
 
     private void deslogar() {
@@ -101,9 +75,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void cadastro(View view) {
-        //Intent entrar = new Intent(this, RegistroActivity.class);
-        //startActivityForResult(entrar, REQUEST_LOGIN);
-        // TODO: requisitar resultado da tela de registro
+        Intent entrar = new Intent(this, CadastroActivity.class);
+        startActivityForResult(entrar, REQUEST_CADASTRO);
     }
 
     @Override
@@ -114,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
                     case LoginActivity.RESULT_SUCCESS:
                         Usuario u = data.getParcelableExtra(LoginActivity.EXTRA_USUARIO);
                         SharedPreferences.Editor edit = prefs.edit();
-                        edit.putString(SETTINGS_TOKEN, u.getToken());
+                        edit.putString(SETTINGS_TOKEN, u.getAccessToken());
                         edit.apply();
                         logar(u);
                         break;
@@ -124,9 +97,16 @@ public class MainActivity extends AppCompatActivity {
                         super.onActivityResult(requestCode, resultCode, data);
                 }
                 break;
-            case REQUEST_REGISTRO:
+            case REQUEST_CADASTRO:
                 switch (resultCode) {
-                    // TODO: processar resposta da tela de registro
+                    case CadastroActivity.RESULT_SUCCESS:
+                        Usuario u = data.getParcelableExtra(LoginActivity.EXTRA_USUARIO);
+                        SharedPreferences.Editor edit = prefs.edit();
+                        edit.putString(SETTINGS_TOKEN, u.getAccessToken());
+                        edit.apply();
+                        logar(u);
+                    case CadastroActivity.RESULT_CANCEL:
+                        break;
                     default:
                         super.onActivityResult(requestCode, resultCode, data);
                 }

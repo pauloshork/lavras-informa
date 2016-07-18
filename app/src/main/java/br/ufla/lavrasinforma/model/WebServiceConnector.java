@@ -1,10 +1,10 @@
 package br.ufla.lavrasinforma.model;
 
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.view.View;
+import android.support.v7.app.AlertDialog;
+import android.util.Log;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
@@ -21,12 +21,13 @@ import com.google.gson.JsonParser;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 
+import br.ufla.lavrasinforma.R;
+
 /**
+ * Classe que auxilia na comunicação com o webservice do aplicativo.
  * Created by paulo on 11/07/16.
  */
 public class WebServiceConnector {
-
-    private static final String URL_WEBSERVICE = "http://pvmarc.ddns.org/lavras-informa/";
 
     public static RequestQueue requestQueue;
 
@@ -48,18 +49,13 @@ public class WebServiceConnector {
     private void asyncRequest(Context context, int method, String path, JsonElement request, final Callback<JsonElement> callback) {
         final Object tag = new Object();
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setCancelable(false);
-        builder.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+        final ProgressDialog dialog = ProgressDialog.show(context, null, "Conectando ao servidor...", true, true, new DialogInterface.OnCancelListener() {
             @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
+            public void onCancel(DialogInterface dialogInterface) {
                 requestQueue.cancelAll(tag);
                 callback.onCancel();
             }
         });
-        builder.setMessage("Conectando com o servidor...");
-
-        final AlertDialog dialog = builder.create();
 
         Response.Listener<JsonElement> listener = new Response.Listener<JsonElement>() {
             @Override
@@ -76,8 +72,8 @@ public class WebServiceConnector {
             }
         };
 
-
-        GsonRequest r = new GsonRequest(gson, method, URL_WEBSERVICE + path, request, listener, errorListener);
+        String webservice = context.getResources().getString(R.string.lavras_informa_webservice);
+        GsonRequest r = new GsonRequest(gson, method, webservice + path, request, listener, errorListener);
         r.setTag(tag);
         requestQueue.add(r);
 
@@ -93,12 +89,34 @@ public class WebServiceConnector {
         }
     }
 
+    public static void mostrarDialogoErro(Context context, Throwable error) {
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
+        dialogBuilder.setMessage(error.getLocalizedMessage());
+        dialogBuilder.setPositiveButton("OK", null);
+        dialogBuilder.show();
+    }
+
+    private static JsonObject criarUserCredentialsRequest(Context context, String username, String password) {
+        JsonObject request = new JsonObject();
+        request.addProperty("client_id", context.getResources().getString(R.string.lavras_informa_app_id));
+        request.addProperty("client_secret", context.getResources().getString(R.string.lavras_informa_app_secret));
+        request.addProperty("grant_type", "password");
+        request.addProperty("username", username);
+        request.addProperty("password", password);
+        return request;
+    }
+
+    /**
+     * Requisição para /login do webservice.
+     * @param context Contexto da aplicação
+     * @param email Endereço de email do usuário
+     * @param senha Senha do usuário
+     * @param callback Função ativada ao fim da requisição
+     */
     public void autenticar(Context context, String email, String senha, final Callback<Usuario> callback) {
-        JsonObject request = new JsonObject();
-        request.addProperty("email", email);
-        request.addProperty("senha", senha);
+        JsonObject request = criarUserCredentialsRequest(context, email, senha);
 
-        asyncRequest(context, Request.Method.POST, "autenticar.php", request, new Callback<JsonElement>() {
+        asyncRequest(context, Request.Method.POST, "/login", request, new Callback<JsonElement>() {
             @Override
             public void onSuccess(JsonElement jsonElement) {
                 try {
@@ -122,11 +140,17 @@ public class WebServiceConnector {
         });
     }
 
-    public void autenticarFacebook(Context context, String token, final Callback<Usuario> callback) {
-        JsonObject request = new JsonObject();
-        request.addProperty("token", token);
+    /**
+     * Requisição para /loginFacebook do webservice
+     * @param context Contexto da aplicação
+     * @param userId UserId fornecido pela API do facebook
+     * @param token AccessToken fornecido pela API do facebook
+     * @param callback Função ativada ao fim da requisição
+     */
+    public void autenticarFacebook(Context context, String userId, String token, final Callback<Usuario> callback) {
+        JsonObject request = criarUserCredentialsRequest(context, userId, token);
 
-        asyncRequest(context, Request.Method.POST, "autenticar-facebook.php", request, new Callback<JsonElement>() {
+        asyncRequest(context, Request.Method.POST, "/loginFacebook", request, new Callback<JsonElement>() {
             @Override
             public void onSuccess(JsonElement jsonElement) {
                 try {
@@ -150,16 +174,15 @@ public class WebServiceConnector {
         });
     }
 
-    public void autorizar(Context context, Usuario usuario, final Callback<Boolean> callback) {
+    public void autorizar(Context context, Usuario usuario, final Callback<Void> callback) {
         JsonElement request = gson.toJsonTree(usuario);
 
-        asyncRequest(context, Request.Method.POST, "autorizar.php", request, new Callback<JsonElement>() {
+        asyncRequest(context, Request.Method.POST, "/validarToken", request, new Callback<JsonElement>() {
             @Override
             public void onSuccess(JsonElement jsonElement) {
                 try {
                     tratarErros(jsonElement);
-                    Boolean status = jsonElement.getAsJsonObject().getAsJsonPrimitive("status").getAsBoolean();
-                    callback.onSuccess(status);
+                    callback.onSuccess(null);
                 } catch (Throwable e) {
                     callback.onError(e);
                 }
@@ -177,19 +200,26 @@ public class WebServiceConnector {
         });
     }
 
-    public void cadastrar(Context context, String email, String senha, String nome, final Callback<Boolean> callback) {
+    /**
+     * Requisição para /cadastro e /login do webservice.
+     * @param context Contexto da aplicação
+     * @param email Endereço de email do usuário
+     * @param senha Senha do usuário
+     * @param nome Nome do usuário
+     * @param callback Função ativada ao fim da requisição
+     */
+    public void cadastrar(final Context context, final String email, final String senha, String nome, final Callback<Usuario> callback) {
         JsonObject request = new JsonObject();
         request.addProperty("email", email);
         request.addProperty("senha", senha);
         request.addProperty("nome", nome);
 
-        asyncRequest(context, Request.Method.POST, "cadastro.php", request, new Callback<JsonElement>() {
+        asyncRequest(context, Request.Method.POST, "/cadastro", request, new Callback<JsonElement>() {
             @Override
             public void onSuccess(JsonElement jsonElement) {
                 try {
                     tratarErros(jsonElement);
-                    Boolean status = jsonElement.getAsJsonObject().getAsJsonPrimitive("status").getAsBoolean();
-                    callback.onSuccess(status);
+                    WebServiceConnector.this.autenticar(context, email, senha, callback);
                 } catch (Throwable e) {
                     callback.onError(e);
                 }
@@ -249,6 +279,7 @@ class GsonRequest extends Request<JsonElement> {
     protected Response<JsonElement> parseNetworkResponse(NetworkResponse response) {
         try {
             String json = new String(response.data, HttpHeaderParser.parseCharset(response.headers));
+            Log.d("json", json);
             JsonParser parser = new JsonParser();
             return Response.success(parser.parse(json), HttpHeaderParser.parseCacheHeaders(response));
         } catch (UnsupportedEncodingException e) {
