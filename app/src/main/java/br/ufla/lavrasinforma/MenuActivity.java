@@ -6,11 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
 
-import com.facebook.login.LoginManager;
-
 public class MenuActivity extends AppCompatActivity {
-
-    public static final String EXTRA_USUARIO = "usuario";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,19 +15,25 @@ public class MenuActivity extends AppCompatActivity {
     }
 
     public void relatarProblema(View view) {
-        Toast.makeText(this, "Não implementado", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "TODO Criar tela de relato de problemas", Toast.LENGTH_LONG).show();
+        // TODO Criar tela de relato de problemas
     }
 
     public void meusRelatos(View view) {
-        Toast.makeText(this, "Não implementado", Toast.LENGTH_LONG).show();
+        Intent lista = new Intent(this, ListaRelatosActivity.class);
+        lista.setAction(ListaRelatosActivity.ACTION_MEUS_RELATOS);
+        startActivity(lista);
     }
 
     public void todosRelator(View view) {
-        Toast.makeText(this, "Não implementado", Toast.LENGTH_LONG).show();
+        Intent lista = new Intent(this, ListaRelatosActivity.class);
+        lista.setAction(ListaRelatosActivity.ACTIOIN_TODOS_RELATOS);
+        startActivity(lista);
     }
 
     public void mapaRelatos(View view) {
-        Toast.makeText(this, "Não implementado", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "TODO Criar tela de mapa de relatos", Toast.LENGTH_LONG).show();
+        // TODO Criar tela de mapa de relatos
     }
 
     public void logout(View view) {

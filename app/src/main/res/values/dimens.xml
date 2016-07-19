@@ -8,4 +8,7 @@
     <dimen name="button.vertical_margin">4dp</dimen>
     <dimen name="button.horizontal_margin">4dp</dimen>
     <dimen name="button.stroke_width">2dp</dimen>
+
+    <dimen name="relato.imagem_width">48dp</dimen>
+    <dimen name="relato.imagem_height">48dp</dimen>
 </resources>

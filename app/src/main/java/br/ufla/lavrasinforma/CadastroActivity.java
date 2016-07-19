@@ -7,9 +7,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.EditText;
 
-import br.ufla.lavrasinforma.model.Callback;
-import br.ufla.lavrasinforma.model.Usuario;
-import br.ufla.lavrasinforma.model.WebServiceConnector;
+import br.ufla.lavrasinforma.model.web.Callback;
+import br.ufla.lavrasinforma.model.AccessToken;
+import br.ufla.lavrasinforma.model.web.WebServiceConnector;
 
 public class CadastroActivity extends AppCompatActivity {
 
@@ -32,11 +32,11 @@ public class CadastroActivity extends AppCompatActivity {
         String senha = txtSenha.getText().toString();
         String nome = txtNome.getText().toString().trim();
 
-        WebServiceConnector.getInstance().cadastrar(this, email, senha, nome, new Callback<Usuario>() {
+        WebServiceConnector.getInstance().cadastrar(this, email, senha, nome, new Callback<AccessToken>() {
             @Override
-            public void onSuccess(Usuario usuario) {
+            public void onSuccess(AccessToken accessToken) {
                 Intent resultado = new Intent();
-                resultado.putExtra(EXTRA_USUARIO, usuario);
+                resultado.putExtra(EXTRA_USUARIO, accessToken);
                 setResult(RESULT_SUCCESS, resultado);
                 finish();
             }

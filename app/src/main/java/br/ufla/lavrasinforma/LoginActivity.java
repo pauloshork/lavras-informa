@@ -15,9 +15,9 @@ import com.facebook.login.LoginResult;
 
 import java.util.Arrays;
 
-import br.ufla.lavrasinforma.model.Callback;
-import br.ufla.lavrasinforma.model.Usuario;
-import br.ufla.lavrasinforma.model.WebServiceConnector;
+import br.ufla.lavrasinforma.model.web.Callback;
+import br.ufla.lavrasinforma.model.AccessToken;
+import br.ufla.lavrasinforma.model.web.WebServiceConnector;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -54,11 +54,11 @@ public class LoginActivity extends AppCompatActivity {
         String emailValor = email.getText().toString();
         String senhaValor = senha.getText().toString();
 
-        WebServiceConnector.getInstance().autenticar(this, emailValor, senhaValor, new Callback<Usuario>() {
+        WebServiceConnector.getInstance().autenticar(this, emailValor, senhaValor, new Callback<AccessToken>() {
             @Override
-            public void onSuccess(Usuario usuario) {
+            public void onSuccess(AccessToken accessToken) {
                 Intent resultado = new Intent();
-                resultado.putExtra(EXTRA_USUARIO, usuario);
+                resultado.putExtra(EXTRA_USUARIO, accessToken);
                 setResult(RESULT_SUCCESS, resultado);
                 finish();
             }
@@ -84,11 +84,11 @@ public class LoginActivity extends AppCompatActivity {
             public void onSuccess(final LoginResult loginResult) {
                 String userId = loginResult.getAccessToken().getUserId();
                 String accessToken = loginResult.getAccessToken().getToken();
-                WebServiceConnector.getInstance().autenticarFacebook(LoginActivity.this, userId, accessToken, new Callback<Usuario>() {
+                WebServiceConnector.getInstance().autenticarFacebook(LoginActivity.this, userId, accessToken, new Callback<AccessToken>() {
                     @Override
-                    public void onSuccess(Usuario usuario) {
+                    public void onSuccess(AccessToken accessToken) {
                         Intent resultado = new Intent();
-                        resultado.putExtra(EXTRA_USUARIO, usuario);
+                        resultado.putExtra(EXTRA_USUARIO, accessToken);
                         setResult(RESULT_SUCCESS, resultado);
                         finish();
                     }

@@ -1,27 +1,26 @@
-package br.ufla.lavrasinforma.model;
+package br.ufla.lavrasinforma.model.web;
 
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.HttpHeaderParser;
+import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
+import java.util.Collection;
 
 import br.ufla.lavrasinforma.R;
+import br.ufla.lavrasinforma.model.AccessToken;
+import br.ufla.lavrasinforma.model.Busca;
+import br.ufla.lavrasinforma.model.Relato;
+import br.ufla.lavrasinforma.model.Usuario;
 
 /**
  * Classe que auxilia na comunicação com o webservice do aplicativo.
@@ -29,20 +28,15 @@ import br.ufla.lavrasinforma.R;
  */
 public class WebServiceConnector {
 
-    public static RequestQueue requestQueue;
-
-    private static WebServiceConnector connector;
+    private static RequestQueue requestQueue;
+    private static WebServiceConnector instance = new WebServiceConnector();
     public static WebServiceConnector getInstance() {
-        if (connector == null) {
-            connector = new WebServiceConnector();
-        }
-
-        return connector;
+        return instance;
     }
 
     private Gson gson;
 
-    public WebServiceConnector() {
+    private WebServiceConnector() {
         this.gson = new Gson();
     }
 
@@ -75,6 +69,11 @@ public class WebServiceConnector {
         String webservice = context.getResources().getString(R.string.lavras_informa_webservice);
         GsonRequest r = new GsonRequest(gson, method, webservice + path, request, listener, errorListener);
         r.setTag(tag);
+
+        if (requestQueue == null) {
+            requestQueue = Volley.newRequestQueue(context);
+        }
+
         requestQueue.add(r);
 
         dialog.show();
@@ -113,7 +112,7 @@ public class WebServiceConnector {
      * @param senha Senha do usuário
      * @param callback Função ativada ao fim da requisição
      */
-    public void autenticar(Context context, String email, String senha, final Callback<Usuario> callback) {
+    public void autenticar(Context context, String email, String senha, final Callback<AccessToken> callback) {
         JsonObject request = criarUserCredentialsRequest(context, email, senha);
 
         asyncRequest(context, Request.Method.POST, "/login", request, new Callback<JsonElement>() {
@@ -121,8 +120,8 @@ public class WebServiceConnector {
             public void onSuccess(JsonElement jsonElement) {
                 try {
                     tratarErros(jsonElement);
-                    Usuario usuario = gson.fromJson(jsonElement, Usuario.class);
-                    callback.onSuccess(usuario);
+                    AccessToken accessToken = gson.fromJson(jsonElement, AccessToken.class);
+                    callback.onSuccess(accessToken);
                 } catch (Throwable e) {
                     callback.onError(e);
                 }
@@ -147,7 +146,7 @@ public class WebServiceConnector {
      * @param token AccessToken fornecido pela API do facebook
      * @param callback Função ativada ao fim da requisição
      */
-    public void autenticarFacebook(Context context, String userId, String token, final Callback<Usuario> callback) {
+    public void autenticarFacebook(Context context, String userId, String token, final Callback<AccessToken> callback) {
         JsonObject request = criarUserCredentialsRequest(context, userId, token);
 
         asyncRequest(context, Request.Method.POST, "/loginFacebook", request, new Callback<JsonElement>() {
@@ -155,34 +154,8 @@ public class WebServiceConnector {
             public void onSuccess(JsonElement jsonElement) {
                 try {
                     tratarErros(jsonElement);
-                    Usuario usuario = gson.fromJson(jsonElement, Usuario.class);
-                    callback.onSuccess(usuario);
-                } catch (Throwable e) {
-                    callback.onError(e);
-                }
-            }
-
-            @Override
-            public void onCancel() {
-                callback.onCancel();
-            }
-
-            @Override
-            public void onError(Throwable error) {
-                callback.onError(error);
-            }
-        });
-    }
-
-    public void autorizar(Context context, Usuario usuario, final Callback<Void> callback) {
-        JsonElement request = gson.toJsonTree(usuario);
-
-        asyncRequest(context, Request.Method.POST, "/validarToken", request, new Callback<JsonElement>() {
-            @Override
-            public void onSuccess(JsonElement jsonElement) {
-                try {
-                    tratarErros(jsonElement);
-                    callback.onSuccess(null);
+                    AccessToken accessToken = gson.fromJson(jsonElement, AccessToken.class);
+                    callback.onSuccess(accessToken);
                 } catch (Throwable e) {
                     callback.onError(e);
                 }
@@ -208,7 +181,7 @@ public class WebServiceConnector {
      * @param nome Nome do usuário
      * @param callback Função ativada ao fim da requisição
      */
-    public void cadastrar(final Context context, final String email, final String senha, String nome, final Callback<Usuario> callback) {
+    public void cadastrar(final Context context, final String email, final String senha, String nome, final Callback<AccessToken> callback) {
         JsonObject request = new JsonObject();
         request.addProperty("email", email);
         request.addProperty("senha", senha);
@@ -236,59 +209,45 @@ public class WebServiceConnector {
             }
         });
     }
-}
 
-class GsonRequest extends Request<JsonElement> {
+    /**
+     * Requisição para /usuario do webservice.
+     * @param context Contexto da aplicação
+     * @param accessToken Token de acesso da seção atual
+     * @param callback Função ativada ao fim da requisição
+     */
+    public void getUsuario(final Context context, final AccessToken accessToken, final Callback<Usuario> callback) {
+        JsonElement request = gson.toJsonTree(accessToken);
 
-    private Gson gson;
-    private JsonElement request;
-    private Response.Listener<JsonElement> listener;
+        asyncRequest(context, Request.Method.POST, "/usuario", request, new Callback<JsonElement>() {
+            @Override
+            public void onSuccess(JsonElement jsonElement) {
+                try {
+                    tratarErros(jsonElement);
+                    Usuario usuario = gson.fromJson(jsonElement, Usuario.class);
+                    callback.onSuccess(usuario);
+                } catch (Throwable e) {
+                    callback.onError(e);
+                }
+            }
 
-    public GsonRequest(Gson gson, int method, String url, Response.Listener<JsonElement> listener, Response.ErrorListener error) {
-        this(gson, method, url, null, listener, error);
+            @Override
+            public void onCancel() {
+                callback.onCancel();
+            }
+
+            @Override
+            public void onError(Throwable error) {
+                callback.onError(error);
+            }
+        });
     }
 
-    public GsonRequest(Gson gson, int method, String url, JsonElement request, Response.Listener<JsonElement> listener, Response.ErrorListener error) {
-        super(method, url, error);
-        this.gson = gson;
-        this.request = request;
-        this.listener = listener;
+    public void buscarRelatos(final Context context, final AccessToken accessToken, final Busca busca, final Callback<Collection<Relato>> callback) {
+        throw new RuntimeException("Não implementado");
     }
 
-    @Override
-    public byte[] getBody() throws AuthFailureError {
-        if (request == null) {
-            return super.getBody();
-        } else {
-            String json = gson.toJson(request);
-            Charset cs = Charset.forName(HttpHeaderParser.parseCharset(getHeaders()));
-            return cs.encode(json).array();
-        }
-    }
-
-    @Override
-    public String getBodyContentType() {
-        if (request == null) {
-            return super.getBodyContentType();
-        } else {
-            return "application/json";
-        }
-    }
-
-    @Override
-    protected Response<JsonElement> parseNetworkResponse(NetworkResponse response) {
-        try {
-            String json = new String(response.data, HttpHeaderParser.parseCharset(response.headers));
-            Log.d("json", json);
-            JsonParser parser = new JsonParser();
-            return Response.success(parser.parse(json), HttpHeaderParser.parseCacheHeaders(response));
-        } catch (UnsupportedEncodingException e) {
-            return Response.error(new VolleyError("Falha ao ler codificação de caracteres", e));
-        }
-    }
-
-    @Override
-    protected void deliverResponse(JsonElement response) {
-        listener.onResponse(response);
+    public void enviarRelato(final Context context, final AccessToken accessToken, final Relato relato, final Callback<Void> callback) {
+        throw new RuntimeException("Não implementado");
     }
 }

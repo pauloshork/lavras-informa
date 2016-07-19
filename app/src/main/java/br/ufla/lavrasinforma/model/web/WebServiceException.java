@@ -1,4 +1,4 @@
-package br.ufla.lavrasinforma.model;
+package br.ufla.lavrasinforma.model.web;
 
 /**
  * Created by paulo on 11/07/16.

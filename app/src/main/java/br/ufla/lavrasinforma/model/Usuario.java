@@ -4,58 +4,81 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * Created by paulo on 11/07/16.
+ * Modelo com os dados do usuário.
+ * Created by paulo on 18/07/16.
  */
-public class Usuario implements Parcelable{
+public class Usuario implements Parcelable {
 
-    private String accessToken;
-    private int expiresIn;
-    private String tokenType;
-    private String scope;
+    /* Tabela base */
+    private int id;
 
-    public String getAccessToken() {
-        return accessToken;
+    /* Tabela de dados */
+    private String email;
+    private String nome;
+
+    /* Tabela de login pelo facebook */
+    private String fbUserId;
+    private String fbAccessToken;
+
+    public Usuario() {
+
     }
 
-    public void setAccessToken(String accessToken) {
-        this.accessToken = accessToken;
+    public int getId() {
+        return id;
     }
 
-    public int getExpiresIn() {
-        return expiresIn;
+    public void setId(int id) {
+        this.id = id;
     }
 
-    public void setExpiresIn(int expiresIn) {
-        this.expiresIn = expiresIn;
+    public String getEmail() {
+        return email;
     }
 
-    public String getTokenType() {
-        return tokenType;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
-    public void setTokenType(String tokenType) {
-        this.tokenType = tokenType;
+    public String getNome() {
+        return nome;
     }
 
-    public String getScope() {
-        return scope;
+    public void setNome(String nome) {
+        this.nome = nome;
     }
 
-    public void setScope(String scope) {
-        this.scope = scope;
+    public String getFbUserId() {
+        return fbUserId;
     }
 
-    public static final Parcelable.Creator<Usuario> CREATOR
-            = new Parcelable.Creator<Usuario>() {
-        public Usuario createFromParcel(Parcel parcel) {
-            Usuario u = new Usuario();
-            u.setAccessToken(parcel.readString());
-            u.setExpiresIn(parcel.readInt());
-            u.setTokenType(parcel.readString());
-            u.setScope(parcel.readString());
-            return u;
+    public void setFbUserId(String fbUserId) {
+        this.fbUserId = fbUserId;
+    }
+
+    public String getFbAccessToken() {
+        return fbAccessToken;
+    }
+
+    public void setFbAccessToken(String fbAccessToken) {
+        this.fbAccessToken = fbAccessToken;
+    }
+
+    protected Usuario(Parcel in) {
+        setId(in.readInt());
+        setEmail(in.readString());
+        setNome(in.readString());
+        setFbUserId(in.readString());
+        setFbAccessToken(in.readString());
+    }
+
+    public static final Creator<Usuario> CREATOR = new Creator<Usuario>() {
+        @Override
+        public Usuario createFromParcel(Parcel in) {
+            return new Usuario(in);
         }
 
+        @Override
         public Usuario[] newArray(int size) {
             return new Usuario[size];
         }
@@ -68,9 +91,10 @@ public class Usuario implements Parcelable{
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeString(getAccessToken());
-        parcel.writeInt(getExpiresIn());
-        parcel.writeString(getTokenType());
-        parcel.writeString(getScope());
+        parcel.writeInt(getId());
+        parcel.writeString(getEmail());
+        parcel.writeString(getNome());
+        parcel.writeString(getFbUserId());
+        parcel.writeString(getFbAccessToken());
     }
 }

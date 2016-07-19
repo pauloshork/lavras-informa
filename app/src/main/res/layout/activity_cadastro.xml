@@ -15,7 +15,8 @@
         android:id="@+id/txtNome"
         android:hint="Nome"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:inputType="textPersonName" />
 
     <EditText
         android:layout_width="match_parent"
