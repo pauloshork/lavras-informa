@@ -44,7 +44,7 @@ public class ListaRelatosActivity extends AppCompatActivity {
                         // TODO Criar tela de visualização/edição de relatos
                         Toast.makeText(ListaRelatosActivity.this, "TODO Criar tela vizualização/edição de relatos", Toast.LENGTH_LONG).show();
                         /*Intent relato = new Intent(ListaRelatosActivity.this, RelatoActivity.class);
-                        if (relato.getIdUsuario() == usuario.getId()) {
+                        if (relato.getIdUsuario() == usuario.getId() || usuario.isAdmin()) {
                             relato.setAction(RelatoActivity.ACTION_VISUALIZAR_EDITAVEL);
                         } else {
                             relato.setAction(RelatoActivity.ACTION_VISUALIZAR_LEITURA);
@@ -72,7 +72,7 @@ public class ListaRelatosActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(Usuario usuario) {
                         Busca busca = new Busca();
-                        busca.setAutor(usuario.getEmail());
+                        busca.setAutor(usuario.getNome());
                         buscar(busca);
                     }
 

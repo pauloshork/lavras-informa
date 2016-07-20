@@ -2,7 +2,7 @@
     <string name="facebook_app_id" translatable="false">1079309248816648</string>
     <string name="lavras_informa_app_id" translatable="false">id_do_aplicativo</string>
     <string name="lavras_informa_app_secret" translatable="false">segredo_do_aplicativo</string>
-    <string name="lavras_informa_webservice" translatable="false">http://192.168.42.109/lavras-informa/index.php</string>
+    <string name="lavras_informa_webservice" translatable="false">http://192.168.1.201/lavras-informa</string>
     <string name="app_name">Lavras Informa</string>
 
     <string name="classificacao_infraestrutura">Infraestrutura</string>

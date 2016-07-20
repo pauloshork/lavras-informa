@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -61,7 +62,7 @@ public class WebServiceConnector {
         Response.ErrorListener errorListener = new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                callback.onError(new WebServiceException("Falha ao realizar requisição", error));
+                callback.onError(new WebServiceException("Falha ao realizar requisição: " + error.getLocalizedMessage(), error));
                 dialog.dismiss();
             }
         };
@@ -83,7 +84,9 @@ public class WebServiceConnector {
         if (element.isJsonObject()) {
             JsonObject object = element.getAsJsonObject();
             if (object.has("error")) {
-                throw new WebServiceException(object.getAsJsonPrimitive("error").getAsString());
+                String message = object.getAsJsonObject("error").getAsJsonPrimitive("message").getAsString();
+                Log.d("json", object.toString());
+                throw new WebServiceException(message);
             }
         }
     }

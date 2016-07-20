@@ -9,6 +9,7 @@ import android.widget.TextView;
 import br.ufla.lavrasinforma.model.Relato;
 
 /**
+ * Classe que armazena os relatos e os exibe em uma ListView.
  * Created by paulo on 18/07/16.
  */
 public class ProblemaListAdapter extends ArrayAdapter<Relato> {

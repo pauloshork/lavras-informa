@@ -9,16 +9,10 @@ import android.os.Parcelable;
  */
 public class Usuario implements Parcelable {
 
-    /* Tabela base */
     private int id;
-
-    /* Tabela de dados */
     private String email;
     private String nome;
-
-    /* Tabela de login pelo facebook */
-    private String fbUserId;
-    private String fbAccessToken;
+    private boolean admin;
 
     public Usuario() {
 
@@ -48,28 +42,21 @@ public class Usuario implements Parcelable {
         this.nome = nome;
     }
 
-    public String getFbUserId() {
-        return fbUserId;
+    public boolean isAdmin() {
+        return admin;
     }
 
-    public void setFbUserId(String fbUserId) {
-        this.fbUserId = fbUserId;
-    }
-
-    public String getFbAccessToken() {
-        return fbAccessToken;
-    }
-
-    public void setFbAccessToken(String fbAccessToken) {
-        this.fbAccessToken = fbAccessToken;
+    public void setAdmin(boolean admin) {
+        this.admin = admin;
     }
 
     protected Usuario(Parcel in) {
         setId(in.readInt());
         setEmail(in.readString());
         setNome(in.readString());
-        setFbUserId(in.readString());
-        setFbAccessToken(in.readString());
+        boolean[] a = new boolean[1];
+        in.readBooleanArray(a);
+        setAdmin(a[0]);
     }
 
     public static final Creator<Usuario> CREATOR = new Creator<Usuario>() {
@@ -94,7 +81,7 @@ public class Usuario implements Parcelable {
         parcel.writeInt(getId());
         parcel.writeString(getEmail());
         parcel.writeString(getNome());
-        parcel.writeString(getFbUserId());
-        parcel.writeString(getFbAccessToken());
+        boolean[] a = {isAdmin()};
+        parcel.writeBooleanArray(a);
     }
 }
