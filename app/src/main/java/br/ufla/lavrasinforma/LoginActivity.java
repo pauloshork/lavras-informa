@@ -2,10 +2,11 @@ package br.ufla.lavrasinforma;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -23,7 +24,7 @@ public class LoginActivity extends AppCompatActivity {
 
     public static final int RESULT_SUCCESS = 1;
     public static final int RESULT_CANCEL = 2;
-    public static final String EXTRA_USUARIO = "usuario";
+    public static final String EXTRA_TOKEN = "token";
 
     private CallbackManager callbackManager;
 
@@ -57,24 +58,25 @@ public class LoginActivity extends AppCompatActivity {
         WebServiceConnector.getInstance().autenticar(this, emailValor, senhaValor, new Callback<AccessToken>() {
             @Override
             public void onSuccess(AccessToken accessToken) {
+                Log.d("login", "onSuccess()");
+                UtilSession.setAccessToken(LoginActivity.this, accessToken);
                 Intent resultado = new Intent();
-                resultado.putExtra(EXTRA_USUARIO, accessToken);
+                resultado.putExtra(EXTRA_TOKEN, accessToken);
                 setResult(RESULT_SUCCESS, resultado);
                 finish();
             }
 
             @Override
             public void onCancel() {
+                Log.d("login", "onCancel()");
             }
 
             @Override
             public void onError(Throwable error) {
-                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(LoginActivity.this);
-                dialogBuilder.setMessage(error.getLocalizedMessage());
-                dialogBuilder.setPositiveButton("OK", null);
-                dialogBuilder.show();
+                Log.d("login", "onError()", error);
+                WebServiceConnector.mostrarDialogoErro(LoginActivity.this, error);
             }
-        });
+        }, true);
     }
 
     public void loginFacebook(View view) {
@@ -82,34 +84,44 @@ public class LoginActivity extends AppCompatActivity {
         manager.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(final LoginResult loginResult) {
+                Log.d("facebook", "onSuccess()");
                 String userId = loginResult.getAccessToken().getUserId();
                 String accessToken = loginResult.getAccessToken().getToken();
+
                 WebServiceConnector.getInstance().autenticarFacebook(LoginActivity.this, userId, accessToken, new Callback<AccessToken>() {
                     @Override
                     public void onSuccess(AccessToken accessToken) {
+                        Log.d("facebook/req", "onSuccess()");
+                        UtilSession.setAccessToken(LoginActivity.this, accessToken);
                         Intent resultado = new Intent();
-                        resultado.putExtra(EXTRA_USUARIO, accessToken);
+                        resultado.putExtra(EXTRA_TOKEN, accessToken);
                         setResult(RESULT_SUCCESS, resultado);
                         finish();
                     }
 
                     @Override
                     public void onCancel() {
+                        Log.d("facebook/req", "onCancel()");
+                        Toast.makeText(LoginActivity.this, "Login cancelado.", Toast.LENGTH_LONG).show();
                     }
 
                     @Override
                     public void onError(Throwable error) {
+                        Log.d("facebook/req", "onError()", error);
                         WebServiceConnector.mostrarDialogoErro(LoginActivity.this, error);
                     }
-                });
+                }, true);
             }
 
             @Override
             public void onCancel() {
+                Log.d("facebook", "onCancel()");
+                Toast.makeText(LoginActivity.this, "Login cancelado.", Toast.LENGTH_LONG).show();
             }
 
             @Override
             public void onError(FacebookException error) {
+                Log.d("facebook", "onError()", error);
                 WebServiceConnector.mostrarDialogoErro(LoginActivity.this, error);
             }
         });

@@ -11,4 +11,6 @@
 
     <dimen name="relato.imagem_width">48dp</dimen>
     <dimen name="relato.imagem_height">48dp</dimen>
+    <dimen name="relato.imagem_width.large">96dp</dimen>
+    <dimen name="relato.imagem_height.large">96dp</dimen>
 </resources>

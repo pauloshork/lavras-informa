@@ -1,24 +1,34 @@
 package br.ufla.lavrasinforma.model;
 
+import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Base64;
 
+import java.io.ByteArrayOutputStream;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import br.ufla.lavrasinforma.UtilNulls;
 
 /**
+ * Modelo de um relato no sistema.
  * Created by paulo on 18/07/16.
  */
 public class Relato implements Parcelable{
+
     private Integer id;
-    private int idUsuario;
+    private Integer id_usuario;
     private Date data;
     private String titulo;
     private String descricao;
     private Status status;
     private Classificacao classificacao;
-    private String foto;
+    private Bitmap foto;
     private double latitude;
     private double longitude;
+    private String nome_usuario;
 
     public Integer getId() {
         return id;
@@ -28,12 +38,12 @@ public class Relato implements Parcelable{
         this.id = id;
     }
 
-    public int getIdUsuario() {
-        return idUsuario;
+    public Integer getIdUsuario() {
+        return id_usuario;
     }
 
-    public void setIdUsuario(int idUsuario) {
-        this.idUsuario = idUsuario;
+    public void setIdUsuario(Integer idUsuario) {
+        this.id_usuario = idUsuario;
     }
 
     public Date getData() {
@@ -76,11 +86,11 @@ public class Relato implements Parcelable{
         this.classificacao = classificacao;
     }
 
-    public String getFoto() {
+    public Bitmap getFoto() {
         return foto;
     }
 
-    public void setFoto(String foto) {
+    public void setFoto(Bitmap foto) {
         this.foto = foto;
     }
 
@@ -100,26 +110,48 @@ public class Relato implements Parcelable{
         this.longitude = longitude;
     }
 
+    public String getNomeUsuario() {
+        return nome_usuario;
+    }
+
+    public void setNomeUsuario(String nomeUsuario) {
+        this.nome_usuario = nomeUsuario;
+    }
+
     public static final Parcelable.Creator<Relato> CREATOR
             = new Parcelable.Creator<Relato>() {
 
         @Override
         public Relato createFromParcel(Parcel parcel) {
             Relato relato = new Relato();
-            byte hasId = parcel.readByte();
-            if (hasId == 1) {
+
+            byte[] nulls = parcel.createByteArray();
+
+            if (UtilNulls.decodeNulls(nulls, 0)) {
                 relato.setId(parcel.readInt());
             }
 
-            relato.setIdUsuario(parcel.readInt());
-            relato.setData(new Date(parcel.readLong()));
+            if (UtilNulls.decodeNulls(nulls, 1)) {
+                relato.setIdUsuario(parcel.readInt());
+            }
+
+            if (UtilNulls.decodeNulls(nulls, 2)) {
+                relato.setData(new Date(parcel.readLong()));
+            }
             relato.setTitulo(parcel.readString());
             relato.setDescricao(parcel.readString());
             relato.setStatus(Status.fromValor(parcel.readByte()));
             relato.setClassificacao(Classificacao.fromValor(parcel.readByte()));
-            relato.setFoto(parcel.readString());
+
+            if (UtilNulls.decodeNulls(nulls, 3)) {
+                relato.setFoto((Bitmap) parcel.readParcelable(getClass().getClassLoader()));
+            }
             relato.setLatitude(parcel.readDouble());
             relato.setLongitude(parcel.readDouble());
+
+            if (UtilNulls.decodeNulls(nulls, 4)) {
+                relato.setNomeUsuario(parcel.readString());
+            }
             return relato;
         }
 
@@ -136,20 +168,63 @@ public class Relato implements Parcelable{
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
-        byte hasId = (byte) (getId() != null ? 1 : 0);
-        parcel.writeByte(hasId);
+        byte[] nulls = UtilNulls.encodeNulls(id, id_usuario, data, foto, nome_usuario);
+        parcel.writeByteArray(nulls);
+
         if (getId() != null) {
             parcel.writeInt(getId());
         }
 
-        parcel.writeInt(getIdUsuario());
-        parcel.writeLong(getData().getTime());
+        if (getIdUsuario() != null) {
+            parcel.writeInt(getIdUsuario());
+        }
+
+        if (getData() != null) {
+            parcel.writeLong(getData().getTime());
+        }
+
         parcel.writeString(getTitulo());
         parcel.writeString(getDescricao());
         parcel.writeByte(getStatus().getValor());
         parcel.writeByte(getClassificacao().getValor());
-        parcel.writeString(getFoto());
+        if (getFoto() != null) {
+            parcel.writeParcelable(getFoto(), i);
+        }
         parcel.writeDouble(getLatitude());
         parcel.writeDouble(getLongitude());
+        if (getNomeUsuario() != null) {
+            parcel.writeString(getNomeUsuario());
+        }
+    }
+
+    public Map<String,String> toParams(Map<String, String> params) {
+        if (params == null) {
+            params = new HashMap<>();
+        }
+
+        if (getId() != null) {
+            params.put("id", getId().toString());
+        }
+
+        params.put("id_usuario", String.valueOf(getIdUsuario()));
+
+        if (getData() != null) {
+            params.put("data", getData().toString());
+        }
+
+        params.put("titulo", getTitulo());
+        params.put("descricao", getDescricao());
+        params.put("status", getStatus().toString());
+        params.put("classificacao", getClassificacao().toString());
+        if (getFoto() != null) {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            foto.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+            String base64 = "data:image/jpeg;base64," + Base64.encodeToString(baos.toByteArray(), Base64.URL_SAFE);
+            params.put("foto", base64);
+        }
+        params.put("latitude", String.valueOf(getLatitude()));
+        params.put("longitude", String.valueOf(getLongitude()));
+
+        return params;
     }
 }

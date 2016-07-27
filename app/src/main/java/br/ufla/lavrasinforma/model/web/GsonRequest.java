@@ -2,7 +2,6 @@ package br.ufla.lavrasinforma.model.web;
 
 import android.util.Log;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -10,10 +9,11 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
+import java.util.Map;
 
 /**
  * Classe que realiza requisições com parâmetros em JSON e recebe respostas em JSON.
@@ -21,55 +21,72 @@ import java.nio.charset.Charset;
  */
 class GsonRequest extends Request<JsonElement> {
 
-    private Gson gson;
-    private JsonElement request;
+    private Map<String, String> params;
     private Response.Listener<JsonElement> listener;
 
-    public GsonRequest(Gson gson, int method, String url, Response.Listener<JsonElement> listener, Response.ErrorListener error) {
-        this(gson, method, url, null, listener, error);
-    }
-
-    public GsonRequest(Gson gson, int method, String url, JsonElement request, Response.Listener<JsonElement> listener, Response.ErrorListener error) {
+    public GsonRequest(int method, String url, Map<String, String> params, Response.Listener<JsonElement> listener, Response.ErrorListener error) {
         super(method, url, error);
-        this.gson = gson;
-        this.request = request;
+        this.params = params;
         this.listener = listener;
     }
 
     @Override
-    public byte[] getBody() throws AuthFailureError {
-        if (request == null) {
-            return super.getBody();
-        } else {
-            String json = gson.toJson(request);
-            Charset cs = Charset.forName(HttpHeaderParser.parseCharset(getHeaders()));
-            return cs.encode(json).array();
-        }
-    }
-
-    @Override
-    public String getBodyContentType() {
-        if (request == null) {
-            return super.getBodyContentType();
-        } else {
-            return "application/json";
-        }
+    public Map<String, String> getParams() {
+        return params;
     }
 
     @Override
     protected Response<JsonElement> parseNetworkResponse(NetworkResponse response) {
         try {
-            String json = new String(response.data, HttpHeaderParser.parseCharset(response.headers));
-            Log.d("json", json);
-            JsonParser parser = new JsonParser();
-            return Response.success(parser.parse(json), HttpHeaderParser.parseCacheHeaders(response));
+            JsonElement element = parseJsonNetworkResponse(response);
+            return Response.success(element, HttpHeaderParser.parseCacheHeaders(response));
         } catch (UnsupportedEncodingException e) {
             return Response.error(new VolleyError("Falha ao ler codificação de caracteres", e));
+        }
+    }
+
+    private WebServiceException tratarErros(JsonElement element, VolleyError error) {
+        if (element.isJsonObject()) {
+            JsonObject object = element.getAsJsonObject();
+            if (object.has("error")) {
+                String message = object.getAsJsonPrimitive("error").toString();
+                if (object.has("error_description")) {
+                    message = message + ": " + object.getAsJsonPrimitive("error_description").getAsString();
+                }
+                return new WebServiceException(message, error);
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    protected VolleyError parseNetworkError(VolleyError volleyError) {
+        if(volleyError.networkResponse != null && volleyError.networkResponse.data != null) {
+            try {
+                JsonElement json = parseJsonNetworkResponse(volleyError.networkResponse);
+                VolleyError jsonError = tratarErros(json, volleyError);
+                if (jsonError != null) {
+                    volleyError = jsonError;
+                }
+            } catch (UnsupportedEncodingException e) {
+                return super.parseNetworkError(volleyError);
+            }
+            return volleyError;
+        } else {
+            return super.parseNetworkError(volleyError);
         }
     }
 
     @Override
     protected void deliverResponse(JsonElement response) {
         listener.onResponse(response);
+    }
+
+    public static JsonElement parseJsonNetworkResponse(NetworkResponse networkResponse) throws UnsupportedEncodingException {
+        String json = new String(networkResponse.data, HttpHeaderParser.parseCharset(networkResponse.headers));
+        Log.d("json", json);
+        JsonParser parser = new JsonParser();
+        return parser.parse(json);
     }
 }

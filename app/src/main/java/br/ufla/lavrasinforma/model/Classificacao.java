@@ -1,6 +1,7 @@
 package br.ufla.lavrasinforma.model;
 
 /**
+ * Valores de classificação do sistema.
  * Created by paulo on 18/07/16.
  */
 public enum Classificacao {
@@ -21,6 +22,20 @@ public enum Classificacao {
 
     public byte getValor() {
         return valor;
+    }
+
+    @Override
+    public String toString() {
+        switch (getValor()) {
+            case 1:
+                return "infraestrutura";
+            case 2:
+                return "saude";
+            case 3:
+                return "seguranca";
+            default:
+                return "null";
+        }
     }
 
     public static Classificacao fromValor(byte valor) {

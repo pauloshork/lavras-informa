@@ -3,14 +3,17 @@ package br.ufla.lavrasinforma.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import br.ufla.lavrasinforma.UtilNulls;
+
 /**
+ * Modelo de um token do sistema.
  * Created by paulo on 11/07/16.
  */
 public class AccessToken implements Parcelable {
 
-    private String accessToken;
-    private int expiresIn;
-    private String tokenType;
+    private String access_token;
+    private Integer expires_in;
+    private String token_type;
     private String scope;
 
     public AccessToken() {
@@ -18,38 +21,45 @@ public class AccessToken implements Parcelable {
     }
 
     public AccessToken(String accessToken) {
-        this.accessToken = accessToken;
+        this.access_token = accessToken;
     }
 
     protected AccessToken(Parcel in) {
+        byte[] nulls = in.createByteArray();
         setAccessToken(in.readString());
-        setExpiresIn(in.readInt());
-        setTokenType(in.readString());
-        setScope(in.readString());
+        if (UtilNulls.decodeNulls(nulls, 0)) {
+            setExpiresIn(in.readInt());
+        }
+        if (UtilNulls.decodeNulls(nulls, 1)) {
+            setTokenType(in.readString());
+        }
+        if (UtilNulls.decodeNulls(nulls, 2)) {
+            setScope(in.readString());
+        }
     }
 
     public String getAccessToken() {
-        return accessToken;
+        return access_token;
     }
 
     public void setAccessToken(String accessToken) {
-        this.accessToken = accessToken;
+        this.access_token = accessToken;
     }
 
-    public int getExpiresIn() {
-        return expiresIn;
+    public Integer getExpiresIn() {
+        return expires_in;
     }
 
-    public void setExpiresIn(int expiresIn) {
-        this.expiresIn = expiresIn;
+    public void setExpiresIn(Integer expiresIn) {
+        this.expires_in = expiresIn;
     }
 
     public String getTokenType() {
-        return tokenType;
+        return token_type;
     }
 
     public void setTokenType(String tokenType) {
-        this.tokenType = tokenType;
+        this.token_type = tokenType;
     }
 
     public String getScope() {
@@ -78,9 +88,17 @@ public class AccessToken implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
+        byte[] nulls = UtilNulls.encodeNulls(expires_in, token_type, scope);
+        parcel.writeByteArray(nulls);
         parcel.writeString(getAccessToken());
-        parcel.writeInt(getExpiresIn());
-        parcel.writeString(getTokenType());
-        parcel.writeString(getScope());
+        if (getExpiresIn() != null) {
+            parcel.writeInt(getExpiresIn());
+        }
+        if (getTokenType() != null) {
+            parcel.writeString(getTokenType());
+        }
+        if (getScope() != null) {
+            parcel.writeString(getScope());
+        }
     }
 }

@@ -15,7 +15,7 @@ public class CadastroActivity extends AppCompatActivity {
 
     public static final int RESULT_SUCCESS = 1;
     public static final int RESULT_CANCEL = 2;
-    public static final String EXTRA_USUARIO = "usuario";
+    public static final String EXTRA_TOKEN = "token";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,8 +35,9 @@ public class CadastroActivity extends AppCompatActivity {
         WebServiceConnector.getInstance().cadastrar(this, email, senha, nome, new Callback<AccessToken>() {
             @Override
             public void onSuccess(AccessToken accessToken) {
+                UtilSession.setAccessToken(CadastroActivity.this, accessToken);
                 Intent resultado = new Intent();
-                resultado.putExtra(EXTRA_USUARIO, accessToken);
+                resultado.putExtra(EXTRA_TOKEN, accessToken);
                 setResult(RESULT_SUCCESS, resultado);
                 finish();
             }
@@ -52,7 +53,7 @@ public class CadastroActivity extends AppCompatActivity {
                 builder.setPositiveButton("OK", null);
                 builder.show();
             }
-        });
+        }, true);
     }
 
     @Override

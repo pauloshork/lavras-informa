@@ -6,7 +6,13 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
 
+import br.ufla.lavrasinforma.model.Usuario;
+import br.ufla.lavrasinforma.model.web.Callback;
+import br.ufla.lavrasinforma.model.web.WebServiceConnector;
+
 public class MenuActivity extends AppCompatActivity {
+
+    private static final int REQUEST_DADOS = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -14,9 +20,28 @@ public class MenuActivity extends AppCompatActivity {
         setContentView(R.layout.activity_menu);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        WebServiceConnector.getInstance().getUsuario(this, UtilSession.getAccessToken(this), new Callback<Usuario>() {
+            @Override
+            public void onSuccess(Usuario usuario) {
+            }
+
+            @Override
+            public void onError(Throwable error) {
+                if (!UtilSession.relogar(MenuActivity.this, error, REQUEST_DADOS)) {
+                    WebServiceConnector.mostrarDialogoErro(MenuActivity.this, error);
+                }
+            }
+        }, true);
+    }
+
     public void relatarProblema(View view) {
-        Toast.makeText(this, "TODO Criar tela de relato de problemas", Toast.LENGTH_LONG).show();
-        // TODO Criar tela de relato de problemas
+        Intent relatar = new Intent(this, RelatoActivity.class);
+        relatar.setAction(RelatoActivity.ACTION_EDITAVEL);
+        startActivity(relatar);
     }
 
     public void meusRelatos(View view) {

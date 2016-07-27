@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <array name="classificacao">
+        <item>Classificação</item>
         <item>@string/classificacao_infraestrutura</item>
         <item>@string/classificacao_saude</item>
         <item>@string/classificacao_seguranca</item>
     </array>
     <array name="status">
+        <item>Status</item>
         <item>@string/status_pendente</item>
         <item>@string/status_em_andamento</item>
         <item>@string/status_solucionado</item>
