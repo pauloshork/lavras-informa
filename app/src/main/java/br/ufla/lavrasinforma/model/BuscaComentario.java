@@ -21,11 +21,11 @@ public class BuscaComentario implements Parcelable {
     }
 
     protected BuscaComentario(Parcel in) {
-        byte[] nulls = in.createByteArray();
-        if (UtilNulls.decodeNulls(nulls, 0)) {
+        UtilNulls nulls = in.readParcelable(getClass().getClassLoader());
+        if (nulls.isNextNotNull()) {
             id_usuario = in.readInt();
         }
-        if (UtilNulls.decodeNulls(nulls, 1)) {
+        if (nulls.isNextNotNull()) {
             id_relato = in.readInt();
         }
     }
@@ -65,8 +65,8 @@ public class BuscaComentario implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
-        byte[] nulls = UtilNulls.encodeNulls(id_usuario, id_relato);
-        parcel.writeByteArray(nulls);
+        UtilNulls nulls = new UtilNulls(id_usuario, id_relato);
+        parcel.writeParcelable(nulls, i);
 
         if (id_usuario != null) {
             parcel.writeInt(id_usuario);

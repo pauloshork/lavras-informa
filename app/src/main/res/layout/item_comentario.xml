@@ -12,7 +12,7 @@
         android:textAppearance="?android:attr/textAppearanceMedium"/>
 
     <TextView
-        android:id="@+id/txtData"
+        android:id="@+id/btnData"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Data"

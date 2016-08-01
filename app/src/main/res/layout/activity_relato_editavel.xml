@@ -27,6 +27,7 @@
             android:id="@+id/foto"
             android:layout_width="@dimen/relato.imagem_width.large"
             android:layout_height="@dimen/relato.imagem_height.large"
+            android:background="@drawable/button"
             android:onClick="tirarFoto" />
 
         <LinearLayout
@@ -47,7 +48,7 @@
                 android:textAppearance="?android:attr/textAppearanceMedium" />
 
             <TextView
-                android:id="@+id/txtData"
+                android:id="@+id/btnData"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="end"
@@ -70,20 +71,45 @@
         </LinearLayout>
     </RelativeLayout>
 
-    <EditText
-        android:id="@+id/txtDescricao"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Descrição"
-        android:layout_below="@id/frame"
-        android:inputType="textLongMessage" />
+        android:layout_height="match_parent"
+        android:layout_below="@id/frame">
 
-    <Button
-        android:id="@+id/btnRelatar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/txtDescricao"
-        android:onClick="relatar"
-        android:text="Relatar"/>
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <Button
+                android:id="@+id/btnLocalizacao"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="localizar"
+                android:text="Localização"/>
+
+            <TextView
+                android:id="@+id/txtLocalizacao"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="Lat:123.4567890 Lon:123.4567890" />
+
+            <EditText
+                android:id="@+id/txtDescricao"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Descrição"
+                android:inputType="textMultiLine" />
+
+            <Button
+                android:id="@+id/btnRelatar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="relatar"
+                android:text="Relatar"/>
+        </LinearLayout>
+
+    </ScrollView>
 
 </RelativeLayout>

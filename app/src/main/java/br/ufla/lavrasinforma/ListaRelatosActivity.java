@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -20,18 +21,17 @@ public class ListaRelatosActivity extends AppCompatActivity {
 
     private static final int REQUEST_BUSCA = 1;
     private static final int REQUEST_VER = 2;
-    public static final String ACTION_MEUS_RELATOS = "meus-relatos";
-    public static final String ACTIOIN_TODOS_RELATOS = "todos-relatos";
+    public static final String EXTRA_BUSCA = "busca";
     private static final String EXTRA_RELATO = "relato";
 
-    private ProblemaListAdapter relatosAdapter;
+    private RelatoListAdapter relatosAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lista_relatos);
 
-        relatosAdapter = new ProblemaListAdapter(getApplicationContext());
+        relatosAdapter = new RelatoListAdapter(getApplicationContext());
 
         ListView lstRelatos = (ListView) findViewById(R.id.lstRelatos);
         if (lstRelatos != null) {
@@ -39,37 +39,50 @@ public class ListaRelatosActivity extends AppCompatActivity {
             lstRelatos.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                    Relato relato = (Relato) adapterView.getSelectedItem();
+                    Relato relato = (Relato) adapterView.getItemAtPosition(i);
                     verRelato(relato);
                 }
             });
         }
+    }
 
-        // Processar ações
-        BuscaRelato buscaRelato;
-        switch (getIntent().getAction()) {
-            case ACTION_MEUS_RELATOS:
-                buscaRelato = new BuscaRelato();
-                buscaRelato.setMeus(true);
-                buscar(buscaRelato);
-                break;
-            case ACTIOIN_TODOS_RELATOS:
-                buscaRelato = new BuscaRelato();
-                buscar(buscaRelato);
-                break;
-        }
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        BuscaRelato buscaRelato = getIntent().getParcelableExtra(EXTRA_BUSCA);
+        buscar(buscaRelato);
     }
 
     public void buscar(View view) {
-        buscar((BuscaRelato) null);
+        BuscaRelato buscaRelato = getIntent().getParcelableExtra(EXTRA_BUSCA);
+        Intent buscar = new Intent(this, BuscaActivity.class);
+        buscar.putExtra(BuscaActivity.EXTRA_BUSCA, buscaRelato);
+        startActivityForResult(buscar, REQUEST_BUSCA);
     }
 
     protected void buscar(BuscaRelato buscaRelato) {
-        Intent buscar = new Intent(this, BuscaActivity.class);
-        if (buscaRelato != null) {
-            buscar.putExtra(BuscaActivity.EXTRA_PARAMETROS, buscaRelato);
-        }
-        startActivityForResult(buscar, REQUEST_BUSCA);
+        getIntent().putExtra(EXTRA_BUSCA, buscaRelato);
+
+        WebServiceConnector.getInstance().buscarRelatos(this, UtilSession.getAccessToken(this), buscaRelato, new Callback<ArrayList<Relato>>() {
+            @Override
+            public void onSuccess(ArrayList<Relato> relatos) {
+                relatosAdapter.clear();
+                relatosAdapter.addAll(relatos);
+            }
+
+            @Override
+            public void onCancel() {
+                Toast.makeText(ListaRelatosActivity.this, "Busca cancelada.", Toast.LENGTH_LONG);
+            }
+
+            @Override
+            public void onError(Throwable error) {
+                if (!UtilSession.relogar(ListaRelatosActivity.this, error, REQUEST_BUSCA)) {
+                    WebServiceConnector.mostrarDialogoErro(ListaRelatosActivity.this, error);
+                }
+            }
+        }, true);
     }
 
     @Override
@@ -78,9 +91,8 @@ public class ListaRelatosActivity extends AppCompatActivity {
             case REQUEST_BUSCA:
                 switch (resultCode) {
                     case BuscaActivity.RESULT_SUCCESS:
-                        ArrayList<Relato> relatos = data.getParcelableArrayListExtra(BuscaActivity.EXTRA_RELATOS);
-                        relatosAdapter.clear();
-                        relatosAdapter.addAll(relatos);
+                        BuscaRelato buscaRelato = data.getParcelableExtra(BuscaActivity.EXTRA_BUSCA);
+                        getIntent().putExtra(EXTRA_BUSCA, buscaRelato);
                         break;
                     case BuscaActivity.RESULT_CANCEL:
                         break;
@@ -98,14 +110,14 @@ public class ListaRelatosActivity extends AppCompatActivity {
     }
 
     protected void verRelato(final Relato relato) {
-        final AccessToken accessToken = UtilSession.getAccessToken(ListaRelatosActivity.this);
+        AccessToken accessToken = UtilSession.getAccessToken(ListaRelatosActivity.this);
         WebServiceConnector.getInstance().getUsuario(ListaRelatosActivity.this, accessToken, new Callback<Usuario>() {
             @Override
             public void onSuccess(Usuario usuario) {
                 Intent verRelato = new Intent(ListaRelatosActivity.this, RelatoActivity.class);
                 verRelato.putExtra(RelatoActivity.EXTRA_RELATO, relato);
-                if (relato.getIdUsuario() == usuario.getId() || usuario.isAdmin()) {
-                    verRelato.setAction(RelatoActivity.ACTION_EDITAVEL);
+                if (relato.getIdUsuario().equals(usuario.getId()) || usuario.isAdmin()) {
+                    verRelato.setAction(RelatoActivity.ACTION_LEITURA_EDITAVEL);
                 } else {
                     verRelato.setAction(RelatoActivity.ACTION_LEITURA);
                 }

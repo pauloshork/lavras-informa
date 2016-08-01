@@ -25,15 +25,15 @@ public class AccessToken implements Parcelable {
     }
 
     protected AccessToken(Parcel in) {
-        byte[] nulls = in.createByteArray();
+        UtilNulls nulls = in.readParcelable(getClass().getClassLoader());
         setAccessToken(in.readString());
-        if (UtilNulls.decodeNulls(nulls, 0)) {
+        if (nulls.isNextNotNull()) {
             setExpiresIn(in.readInt());
         }
-        if (UtilNulls.decodeNulls(nulls, 1)) {
+        if (nulls.isNextNotNull()) {
             setTokenType(in.readString());
         }
-        if (UtilNulls.decodeNulls(nulls, 2)) {
+        if (nulls.isNextNotNull()) {
             setScope(in.readString());
         }
     }
@@ -88,8 +88,8 @@ public class AccessToken implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
-        byte[] nulls = UtilNulls.encodeNulls(expires_in, token_type, scope);
-        parcel.writeByteArray(nulls);
+        UtilNulls nulls = new UtilNulls(expires_in, token_type, scope);
+        parcel.writeParcelable(nulls, i);
         parcel.writeString(getAccessToken());
         if (getExpiresIn() != null) {
             parcel.writeInt(getExpiresIn());

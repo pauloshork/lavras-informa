@@ -7,8 +7,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import br.ufla.lavrasinforma.UtilConvert;
 import br.ufla.lavrasinforma.UtilNulls;
-import br.ufla.lavrasinforma.UtilSession;
 
 /**
  * Modelo do comentário do sistema.
@@ -27,19 +27,21 @@ public class Comentario implements Parcelable {
     }
 
     protected Comentario(Parcel in) {
-        byte[] nulls = in.createByteArray();
-        if (UtilNulls.decodeNulls(nulls, 0)) {
+        UtilNulls nulls = in.readParcelable(getClass().getClassLoader());
+        if (nulls.isNextNotNull()) {
             id = in.readInt();
         }
-        if (UtilNulls.decodeNulls(nulls, 1)) {
+        if (nulls.isNextNotNull()) {
             id_usuario = in.readInt();
         }
         id_relato = in.readInt();
-        if (UtilNulls.decodeNulls(nulls, 2)) {
+        if (nulls.isNextNotNull()) {
             data = new Date(in.readLong());
         }
-        texto = in.readString();
-        if (UtilNulls.decodeNulls(nulls, 3)) {
+        if (nulls.isNextNotNull()) {
+            texto = in.readString();
+        }
+        if (nulls.isNextNotNull()) {
             nome_usuario = in.readString();
         }
     }
@@ -111,8 +113,8 @@ public class Comentario implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
-        byte[] nulls = UtilNulls.encodeNulls(id, id_usuario, data, nome_usuario);
-        parcel.writeByteArray(nulls);
+        UtilNulls nulls = new UtilNulls(id, id_usuario, data, texto, nome_usuario);
+        parcel.writeParcelable(nulls, i);
 
         if (id != null) {
             parcel.writeInt(id);
@@ -124,7 +126,9 @@ public class Comentario implements Parcelable {
         if (data != null) {
             parcel.writeLong(data.getTime());
         }
-        parcel.writeString(texto);
+        if (texto != null) {
+            parcel.writeString(texto);
+        }
         if (nome_usuario != null) {
             parcel.writeString(nome_usuario);
         }
@@ -138,12 +142,16 @@ public class Comentario implements Parcelable {
         if (id != null) {
             params.put("id", String.valueOf(id));
         }
-        params.put("id_usuario", String.valueOf(id_usuario));
+        if (id_usuario != null) {
+            params.put("id_usuario", String.valueOf(id_usuario));
+        }
         params.put("id_relato", String.valueOf(id_relato));
         if (data != null) {
-            params.put("data", data.toString());
+            params.put("data", UtilConvert.fromDate(data));
         }
-        params.put("texto", texto);
+        if (texto != null) {
+            params.put("texto", texto);
+        }
 
         return params;
     }

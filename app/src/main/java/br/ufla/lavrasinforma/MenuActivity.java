@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
 
+import br.ufla.lavrasinforma.model.BuscaRelato;
 import br.ufla.lavrasinforma.model.Usuario;
 import br.ufla.lavrasinforma.model.web.Callback;
 import br.ufla.lavrasinforma.model.web.WebServiceConnector;
@@ -46,13 +47,15 @@ public class MenuActivity extends AppCompatActivity {
 
     public void meusRelatos(View view) {
         Intent lista = new Intent(this, ListaRelatosActivity.class);
-        lista.setAction(ListaRelatosActivity.ACTION_MEUS_RELATOS);
+        BuscaRelato buscaRelato = new BuscaRelato();
+        buscaRelato.setMeus(true);
+        lista.putExtra(ListaRelatosActivity.EXTRA_BUSCA, buscaRelato);
         startActivity(lista);
     }
 
     public void todosRelator(View view) {
         Intent lista = new Intent(this, ListaRelatosActivity.class);
-        lista.setAction(ListaRelatosActivity.ACTIOIN_TODOS_RELATOS);
+        lista.putExtra(ListaRelatosActivity.EXTRA_BUSCA, new BuscaRelato());
         startActivity(lista);
     }
 

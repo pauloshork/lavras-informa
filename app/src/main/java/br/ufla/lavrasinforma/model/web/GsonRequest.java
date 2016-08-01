@@ -11,6 +11,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
@@ -42,6 +43,8 @@ class GsonRequest extends Request<JsonElement> {
             return Response.success(element, HttpHeaderParser.parseCacheHeaders(response));
         } catch (UnsupportedEncodingException e) {
             return Response.error(new VolleyError("Falha ao ler codificação de caracteres", e));
+        } catch (JsonSyntaxException e) {
+            return Response.error(new VolleyError("Falha ao decodificar JSON", e));
         }
     }
 
@@ -69,7 +72,7 @@ class GsonRequest extends Request<JsonElement> {
                 if (jsonError != null) {
                     volleyError = jsonError;
                 }
-            } catch (UnsupportedEncodingException e) {
+            } catch (UnsupportedEncodingException | JsonSyntaxException e) {
                 return super.parseNetworkError(volleyError);
             }
             return volleyError;
@@ -83,7 +86,7 @@ class GsonRequest extends Request<JsonElement> {
         listener.onResponse(response);
     }
 
-    public static JsonElement parseJsonNetworkResponse(NetworkResponse networkResponse) throws UnsupportedEncodingException {
+    public static JsonElement parseJsonNetworkResponse(NetworkResponse networkResponse) throws UnsupportedEncodingException, JsonSyntaxException {
         String json = new String(networkResponse.data, HttpHeaderParser.parseCharset(networkResponse.headers));
         Log.d("json", json);
         JsonParser parser = new JsonParser();

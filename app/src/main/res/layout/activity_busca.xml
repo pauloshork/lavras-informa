@@ -26,19 +26,31 @@
 
         android:hint="Autor"/>
 
-    <EditText
-        android:id="@+id/txtData"
-        android:layout_width="match_parent"
+    <Button
+        android:id="@+id/btnResetData"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/txtAutor"
-        android:inputType="date"
-        android:hint="Data"/>
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:onClick="resetData"
+        android:text="X"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/txtAutor"
+        android:layout_toLeftOf="@id/btnResetData"
+        android:layout_toStartOf="@id/btnResetData"
+        android:id="@+id/btnData"
+        android:text="Data"
+        android:onClick="selecionarData"/>
 
     <Spinner
         android:id="@+id/txtClassificacao"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/txtData"
+        android:layout_below="@id/btnData"
         android:entries="@array/classificacao" />
 
     <Spinner

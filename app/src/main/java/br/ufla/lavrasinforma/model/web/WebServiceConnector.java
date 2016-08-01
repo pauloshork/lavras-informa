@@ -21,15 +21,19 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import br.ufla.lavrasinforma.R;
+import br.ufla.lavrasinforma.UtilConvert;
 import br.ufla.lavrasinforma.model.AccessToken;
 import br.ufla.lavrasinforma.model.BuscaComentario;
 import br.ufla.lavrasinforma.model.BuscaRelato;
@@ -94,7 +98,12 @@ public class WebServiceConnector {
     private Gson gson;
 
     private WebServiceConnector() {
-        this.gson = new Gson();
+        GsonBuilder build = new GsonBuilder();
+        build.setDateFormat(UtilConvert.DATE_PATTERN);
+        build.registerTypeAdapter(Boolean.class, new BooleanTypeAdapter());
+        build.registerTypeAdapter(boolean.class, new BooleanTypeAdapter());
+        build.registerTypeAdapter(Date.class, new DateTypeAdapter());
+        this.gson = build.create();
     }
 
     private void asyncRequest(final Context context, int method, String path, Map<String, String> request, final Callback<JsonElement> callback, boolean modal) {
@@ -165,6 +174,7 @@ public class WebServiceConnector {
     }
 
     public static void mostrarDialogoErro(Context context, Throwable error) {
+        Log.w("erro", error);
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
         dialogBuilder.setMessage(error.getLocalizedMessage());
         dialogBuilder.setPositiveButton("OK", null);
@@ -315,16 +325,16 @@ public class WebServiceConnector {
         asyncRequest(context, Request.Method.POST, "/comentarios", request, new Callback<JsonElement>(callback) {
             @Override
             public void onSuccess(JsonElement jsonElement) {
-                Type listType = new TypeToken<ArrayList<Comentario>>() {}.getType();
-                ArrayList<Comentario> list = gson.fromJson(jsonElement, listType);
-                callback.onSuccess(list);
+                Type listType = new TypeToken<Collection<Comentario>>() {}.getType();
+                Collection<Comentario> list = gson.fromJson(jsonElement, listType);
+                callback.onSuccess(new ArrayList<>(list));
             }
         }, modal);
     }
 
     public String buscarImagem(Context context, AccessToken accessToken, Relato relato) {
         String webservice = context.getResources().getString(R.string.lavras_informa_webservice);
-        String path = "/foto?access_token=" + accessToken.getAccessToken() + "&id=" + relato.getId();
+        String path = "/imagem?access_token=" + accessToken.getAccessToken() + "&id=" + relato.getId();
         return webservice + path;
     }
 

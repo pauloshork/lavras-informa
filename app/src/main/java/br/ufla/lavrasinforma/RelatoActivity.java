@@ -2,6 +2,7 @@ package br.ufla.lavrasinforma;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -14,6 +15,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -23,13 +25,12 @@ import android.widget.Toast;
 
 import com.android.volley.toolbox.NetworkImageView;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
 
 import br.ufla.lavrasinforma.model.BuscaComentario;
-import br.ufla.lavrasinforma.model.Classificacao;
 import br.ufla.lavrasinforma.model.Comentario;
 import br.ufla.lavrasinforma.model.Relato;
-import br.ufla.lavrasinforma.model.Status;
 import br.ufla.lavrasinforma.model.web.Callback;
 import br.ufla.lavrasinforma.model.web.WebServiceConnector;
 
@@ -43,6 +44,7 @@ public class RelatoActivity extends AppCompatActivity {
 
     public static final String ACTION_EDITAVEL = "visualizar-editavel";
     public static final String ACTION_LEITURA = "visualizar-leitura";
+    public static final String ACTION_LEITURA_EDITAVEL = "visualizar-leitura-editavel";
     public static final String EXTRA_RELATO = "relato";
     private static final String EXTRA_COMENTARIO = "comentario";
 
@@ -52,13 +54,22 @@ public class RelatoActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        switch (getIntent().getAction()) {
+        Intent intent = getIntent();
+
+        switch (intent.getAction()) {
             case ACTION_EDITAVEL:
                 stateEditavel();
                 break;
+            case ACTION_LEITURA_EDITAVEL:
+                stateLeitura(true);
+                break;
             case ACTION_LEITURA:
             default:
-                stateLeitura();
+                stateLeitura(false);
+        }
+
+        if (!intent.hasExtra(EXTRA_RELATO)) {
+            intent.putExtra(EXTRA_RELATO, new Relato());
         }
     }
 
@@ -69,18 +80,20 @@ public class RelatoActivity extends AppCompatActivity {
         NetworkImageView foto = (NetworkImageView) findViewById(R.id.foto);
         EditText txtTitulo = (EditText) findViewById(R.id.txtTitulo);
         TextView txtAutor = (TextView) findViewById(R.id.txtAutor);
-        TextView txtData = (TextView) findViewById(R.id.txtData);
+        TextView txtData = (TextView) findViewById(R.id.btnData);
         Spinner txtClassificacao = (Spinner) findViewById(R.id.txtClassificacao);
         Spinner txtStatus = (Spinner) findViewById(R.id.txtStatus);
+        TextView txtLocalizacao = (TextView) findViewById(R.id.txtLocalizacao);
         EditText txtDescricao = (EditText) findViewById(R.id.txtDescricao);
 
         Relato relato = getIntent().getParcelableExtra(EXTRA_RELATO);
 
         if (relato != null) {
-            if (relato.getId() != null) {
+            if (relato.getDadosFoto() != null) {
+                BitmapDrawable drawable = new BitmapDrawable(relato.getDadosFoto());
+                foto.setBackground(drawable);
+            } else if (relato.getId() != null) {
                 foto.setImageUrl(WebServiceConnector.getInstance().buscarImagem(this, UtilSession.getAccessToken(this), relato), WebServiceConnector.getImageLoader(this));
-            } else {
-                foto.setImageUrl(null, WebServiceConnector.getImageLoader(this));
             }
 
             txtTitulo.setText(relato.getTitulo());
@@ -90,30 +103,48 @@ public class RelatoActivity extends AppCompatActivity {
                 txtAutor.setVisibility(View.GONE);
             }
             if (relato.getData() != null) {
-                txtData.setText(relato.getData().toString());
+                txtData.setText(DateFormat.getDateTimeInstance().format(relato.getData()));
             } else {
                 txtData.setVisibility(View.GONE);
             }
-            txtClassificacao.setSelection(relato.getClassificacao().getValor());
-            txtStatus.setSelection(relato.getStatus().getValor());
+            txtClassificacao.setSelection(UtilConvert.positionFromClassificacao(relato.getClassificacao()));
+            txtStatus.setSelection(UtilConvert.positionFromStatus(relato.getStatus()));
+
+            if (relato.getLatitude() != 0.0 && relato.getLongitude() != 0.0) {
+                txtLocalizacao.setText("Lat: " + relato.getLatitude() + " Lon: " + relato.getLongitude());
+            } else {
+                txtLocalizacao.setText("Sem localização definida");
+            }
+
             txtDescricao.setText(relato.getDescricao());
         } else {
             txtAutor.setVisibility(View.GONE);
             txtData.setVisibility(View.GONE);
+            txtLocalizacao.setText("Sem localização definida");
         }
     }
 
-    protected void stateLeitura() {
+    protected void stateLeitura(boolean editavel) {
         setContentView(R.layout.activity_relato_leitura);
-        editavel = false;
+        this.editavel = false;
 
         NetworkImageView foto = (NetworkImageView) findViewById(R.id.foto);
         TextView txtTitulo = (TextView) findViewById(R.id.txtTitulo);
         TextView txtAutor = (TextView) findViewById(R.id.txtAutor);
-        TextView txtData = (TextView) findViewById(R.id.txtData);
+        TextView txtData = (TextView) findViewById(R.id.btnData);
         TextView txtClassificacao = (TextView) findViewById(R.id.txtClassificacao);
         TextView txtStatus = (TextView) findViewById(R.id.txtStatus);
         TextView txtDescricao = (TextView) findViewById(R.id.txtDescricao);
+        Button btnEditar = (Button) findViewById(R.id.btnEditar);
+        Button btnApagar = (Button) findViewById(R.id.btnApagar);
+
+        if (editavel) {
+            btnEditar.setVisibility(View.VISIBLE);
+            btnApagar.setVisibility(View.VISIBLE);
+        } else {
+            btnEditar.setVisibility(View.GONE);
+            btnApagar.setVisibility(View.GONE);
+        }
 
         Relato relato = getIntent().getParcelableExtra(EXTRA_RELATO);
 
@@ -121,7 +152,7 @@ public class RelatoActivity extends AppCompatActivity {
             foto.setImageUrl(WebServiceConnector.getInstance().buscarImagem(this, UtilSession.getAccessToken(this), relato), WebServiceConnector.getImageLoader(this));
             txtTitulo.setText(relato.getTitulo());
             txtAutor.setText(relato.getNomeUsuario());
-            txtData.setText(relato.getData().toString());
+            txtData.setText(DateFormat.getDateTimeInstance().format(relato.getData()));
             txtClassificacao.setText(relato.getClassificacao().toString());
             txtStatus.setText(relato.getStatus().toString());
             txtDescricao.setText(relato.getDescricao());
@@ -151,9 +182,15 @@ public class RelatoActivity extends AppCompatActivity {
                 WebServiceConnector.getInstance().buscarComentarios(this, UtilSession.getAccessToken(this), buscaComentario, new Callback<ArrayList<Comentario>>() {
                     @Override
                     public void onSuccess(ArrayList<Comentario> comentarios) {
-                        for (Comentario c : comentarios) {
-                            View v = criarViewComentario(c);
-                            list.addView(v);
+                        progress.setVisibility(View.GONE);
+                        if (comentarios.isEmpty()) {
+                            semComentarios.setVisibility(View.VISIBLE);
+                        } else {
+                            semComentarios.setVisibility(View.GONE);
+                            for (Comentario c : comentarios) {
+                                View v = criarViewComentario(c);
+                                list.addView(v);
+                            }
                         }
                     }
 
@@ -177,10 +214,10 @@ public class RelatoActivity extends AppCompatActivity {
     }
 
     protected View criarViewComentario(Comentario comentario) {
-        View v = getLayoutInflater().inflate(R.layout.item_comentario, null);
+        View v = getLayoutInflater().inflate(R.layout.item_comentario, null, false);
 
         TextView txtAutor = (TextView) v.findViewById(R.id.txtAutor);
-        TextView txtData = (TextView) v.findViewById(R.id.txtData);
+        TextView txtData = (TextView) v.findViewById(R.id.btnData);
         TextView txtComentario = (TextView) v.findViewById(R.id.txtComentario);
 
         txtAutor.setText(comentario.getNomeUsuario());
@@ -193,7 +230,6 @@ public class RelatoActivity extends AppCompatActivity {
     public void comentar(View view) {
         EditText txtComentar = (EditText) findViewById(R.id.txtComentar);
 
-
         Relato relato = getIntent().getParcelableExtra(EXTRA_RELATO);
         String texto = txtComentar.getText().toString();
         if (!texto.isEmpty()) {
@@ -205,12 +241,29 @@ public class RelatoActivity extends AppCompatActivity {
         }
     }
 
+    public void localizar(View view) {
+        localizar();
+    }
+
+    public void editar(View view) {
+        stateEditavel();
+    }
+
+    public void apagar(View view) {
+        Relato relato = getIntent().getParcelableExtra(EXTRA_RELATO);
+        relato.setTitulo(null);
+        getIntent().putExtra(EXTRA_RELATO, relato);
+        relatarWeb();
+    }
+
     private void comentar(Comentario comentario) {
         getIntent().putExtra(EXTRA_COMENTARIO, comentario);
         WebServiceConnector.getInstance().enviarComentario(this, UtilSession.getAccessToken(this), comentario, new Callback<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
                 Toast.makeText(RelatoActivity.this, "Comentário enviado com sucesso.", Toast.LENGTH_LONG).show();
+                TextView txtComentar = (TextView) findViewById(R.id.txtComentar);
+                txtComentar.setText("");
                 carregarComentarios();
             }
 
@@ -229,33 +282,29 @@ public class RelatoActivity extends AppCompatActivity {
     }
 
     public void relatar(View view) {
-        final Relato relato;
-        if (getIntent().hasExtra(EXTRA_RELATO)) {
-            relato = getIntent().getParcelableExtra(EXTRA_RELATO);
-        } else {
-            relato = new Relato();
-        }
+        final Relato relato = getIntent().getParcelableExtra(EXTRA_RELATO);
 
-        NetworkImageView foto = (NetworkImageView) findViewById(R.id.foto);
         EditText txtTitulo = (EditText) findViewById(R.id.txtTitulo);
         Spinner txtClassificacao = (Spinner) findViewById(R.id.txtClassificacao);
         Spinner txtStatus = (Spinner) findViewById(R.id.txtStatus);
         EditText txtDescricao = (EditText) findViewById(R.id.txtDescricao);
 
-        if (foto.getBackground() instanceof BitmapDrawable) {
-            Bitmap bmp = ((BitmapDrawable) foto.getBackground()).getBitmap();
-            relato.setFoto(bmp);
-        }
         relato.setTitulo(txtTitulo.getText().toString());
-        relato.setClassificacao(Classificacao.fromValor((byte) txtClassificacao.getSelectedItemPosition()));
-        relato.setStatus(Status.fromValor((byte) txtStatus.getSelectedItemPosition()));
+        relato.setClassificacao(UtilConvert.classificacaoFromPosition(txtClassificacao.getSelectedItemPosition()));
+        relato.setStatus(UtilConvert.statusFromPosition(txtStatus.getSelectedItemPosition()));
         relato.setDescricao(txtDescricao.getText().toString());
+        relato.setFoto(relato.getFoto() || relato.getDadosFoto() != null);
 
         getIntent().putExtra(EXTRA_RELATO, relato);
-        relatarGps();
+        if (relato.getLatitude() != 0.0 && relato.getLongitude() != 0.0) {
+            relatarWeb();
+        } else {
+            Toast.makeText(this, "Você deve fornecer a localização no relato.", Toast.LENGTH_LONG);
+        }
     }
 
     private void ativarGps() {
+        Toast.makeText(this, "Ative o GPS do seu dipositivo.", Toast.LENGTH_LONG);
         Intent gpsOptionsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
         startActivityForResult(gpsOptionsIntent, REQUEST_GPS);
     }
@@ -268,25 +317,29 @@ public class RelatoActivity extends AppCompatActivity {
     }
 
     private void setFoto(Bitmap bitmap) {
+        Relato relato = getIntent().getParcelableExtra(EXTRA_RELATO);
+        if (relato == null) {
+            relato = new Relato();
+        }
+        relato.setDadosFoto(bitmap);
+        getIntent().putExtra(EXTRA_RELATO, relato);
+
         BitmapDrawable drawable = new BitmapDrawable(getResources(), bitmap);
         NetworkImageView foto = (NetworkImageView) findViewById(R.id.foto);
         foto.setBackground(drawable);
     }
 
-    private void relatarGps() {
+    private void localizar() {
         final LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             ativarGps();
         } else {
             final ProgressDialog dialog = new ProgressDialog(this);
-            dialog.setMessage("Buscando localização...");
-            dialog.setIndeterminate(true);
-            dialog.setCancelable(false);
-            dialog.show();
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, new LocationListener() {
+            final LocationListener locationListener = new LocationListener() {
                 @Override
                 public void onLocationChanged(Location location) {
-                    Log.d("gps", location.toString());
+                    Log.d("gps", "la:" + location.getLatitude() + ",lo=" + location.getLongitude() + ",ac=" + location.getAccuracy());
+                    dialog.setMessage("Precisão: " + location.getAccuracy() + "m\nEste valor deve ser menor que 25m.");
                     if (location.getAccuracy() < 25) {
                         dialog.dismiss();
                         Relato relato = getIntent().getParcelableExtra(EXTRA_RELATO);
@@ -294,7 +347,9 @@ public class RelatoActivity extends AppCompatActivity {
                         relato.setLongitude(location.getLongitude());
                         getIntent().putExtra(EXTRA_RELATO, relato);
                         locationManager.removeUpdates(this);
-                        relatarWeb();
+
+                        TextView txtLocalizacao = (TextView) findViewById(R.id.txtLocalizacao);
+                        txtLocalizacao.setText("Lat: " + location.getLatitude() + " Lon: " + location.getLongitude());
                     }
                 }
 
@@ -310,7 +365,21 @@ public class RelatoActivity extends AppCompatActivity {
                     locationManager.removeUpdates(this);
                     ativarGps();
                 }
+            };
+
+            dialog.setTitle("Buscando localização");
+            dialog.setMessage("Aguardando sinal...");
+            dialog.setIndeterminate(true);
+            dialog.setCancelable(true);
+            dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                @Override
+                public void onCancel(DialogInterface dialogInterface) {
+                    locationManager.removeUpdates(locationListener);
+                    Toast.makeText(RelatoActivity.this, "Localização cancelada.", Toast.LENGTH_LONG);
+                }
             });
+            dialog.show();
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
         }
     }
 
@@ -347,7 +416,7 @@ public class RelatoActivity extends AppCompatActivity {
                 carregarComentarios();
                 break;
             case REQUEST_GPS:
-                relatarGps();
+                localizar();
                 break;
             case REQUEST_FOTO:
                 switch (resultCode) {

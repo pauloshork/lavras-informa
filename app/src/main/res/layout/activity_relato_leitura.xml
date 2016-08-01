@@ -7,7 +7,9 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context=".RelatoActivity">
+    tools:context=".RelatoActivity"
+    android:descendantFocusability="beforeDescendants"
+    android:focusableInTouchMode="true">
 
     <TextView
         android:id="@+id/txtTitulo"
@@ -37,7 +39,7 @@
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <TextView
-        android:id="@+id/txtData"
+        android:id="@+id/btnData"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/txtAutor"
@@ -52,7 +54,7 @@
         android:id="@+id/txtClassificacao"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/txtData"
+        android:layout_below="@id/btnData"
         android:layout_toRightOf="@id/foto"
         android:layout_toEndOf="@id/foto"
         android:gravity="end"
@@ -83,10 +85,36 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
+            <LinearLayout
+                android:id="@+id/comandos"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <Button
+                    android:id="@+id/btnEditar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:onClick="editar"
+
+                    android:text="Editar"/>
+
+                <Button
+                    android:id="@+id/btnApagar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:onClick="apagar"
+
+                    android:text="Apagar"/>
+            </LinearLayout>
+
             <TextView
                 android:id="@+id/txtDescricao"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_below="@id/comandos"
 
                 android:text="Descrição descrição descrição descrição descrição descrição descrição descrição descrição descrição descrição descrição descrição descrição ."
                 android:textAppearance="?android:attr/textAppearanceMedium" />
@@ -145,7 +173,9 @@
                 android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/txtComentar" />
+                android:layout_below="@id/txtComentar"
+                android:showDividers="middle"
+                android:divider="@android:drawable/divider_horizontal_dark"/>
 
         </RelativeLayout>
 

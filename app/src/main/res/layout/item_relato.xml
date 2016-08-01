@@ -3,10 +3,11 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <ImageView
+    <com.android.volley.toolbox.NetworkImageView
         android:layout_width="@dimen/relato.imagem_width"
         android:layout_height="@dimen/relato.imagem_height"
-        android:id="@+id/imagem" />
+        android:id="@+id/item_relato_imagem"
+        android:background="@drawable/button"/>
 
     <LinearLayout
         android:orientation="vertical"
@@ -18,14 +19,14 @@
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:text="Título do relato"
-            android:id="@+id/item_problema_titulo" />
+            android:id="@+id/item_relato_titulo" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:text="Status do relato"
-            android:id="@+id/item_problema_status" />
+            android:id="@+id/item_relato_status" />
     </LinearLayout>
 
 </LinearLayout>

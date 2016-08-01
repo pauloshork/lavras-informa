@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import br.ufla.lavrasinforma.UtilConvert;
 import br.ufla.lavrasinforma.UtilNulls;
 
 /**
@@ -18,8 +19,8 @@ public class BuscaRelato implements Parcelable {
     private String titulo;
     private String autor;
     private Date data;
-    private Status status;
-    private Classificacao classificacao;
+    private String status;
+    private String classificacao;
     private Boolean foto;
     private Boolean meus;
 
@@ -28,28 +29,28 @@ public class BuscaRelato implements Parcelable {
     }
 
     protected BuscaRelato(Parcel in) {
-        byte[] nulls = in.createByteArray();
+        UtilNulls nulls = in.readParcelable(getClass().getClassLoader());
 
-        if (UtilNulls.decodeNulls(nulls, 0)) {
+        if (nulls.isNextNotNull()) {
             setTitulo(in.readString());
         }
-        if (UtilNulls.decodeNulls(nulls, 1)) {
+        if (nulls.isNextNotNull()) {
             setAutor(in.readString());
         }
-        if (UtilNulls.decodeNulls(nulls, 2)) {
+        if (nulls.isNextNotNull()) {
             setData(new Date(in.readLong()));
         }
-        if (UtilNulls.decodeNulls(nulls, 3)) {
-            setStatus(Status.fromValor(in.readByte()));
+        if (nulls.isNextNotNull()) {
+            setStatus(in.readString());
         }
-        if (UtilNulls.decodeNulls(nulls, 4)) {
-            setClassificacao(Classificacao.fromValor(in.readByte()));
+        if (nulls.isNextNotNull()) {
+            setClassificacao(in.readString());
         }
-        if (UtilNulls.decodeNulls(nulls, 5)) {
+        if (nulls.isNextNotNull()) {
             boolean foto[] = in.createBooleanArray();
             setFoto(foto[0]);
         }
-        if (UtilNulls.decodeNulls(nulls, 6)) {
+        if (nulls.isNextNotNull()) {
             boolean meus[] = in.createBooleanArray();
             setMeus(meus[0]);
         }
@@ -79,19 +80,19 @@ public class BuscaRelato implements Parcelable {
         this.data = data;
     }
 
-    public Status getStatus() {
+    public String getStatus() {
         return status;
     }
 
-    public void setStatus(Status status) {
+    public void setStatus(String status) {
         this.status = status;
     }
 
-    public Classificacao getClassificacao() {
+    public String getClassificacao() {
         return classificacao;
     }
 
-    public void setClassificacao(Classificacao classificacao) {
+    public void setClassificacao(String classificacao) {
         this.classificacao = classificacao;
     }
 
@@ -130,8 +131,8 @@ public class BuscaRelato implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel out, int i) {
-        byte[] nulls = UtilNulls.encodeNulls(titulo, autor, data, status, classificacao, foto, meus);
-        out.writeByteArray(nulls);
+        UtilNulls nulls = new UtilNulls(titulo, autor, data, status, classificacao, foto, meus);
+        out.writeParcelable(nulls, i);
 
         if (titulo != null) {
             out.writeString(getTitulo());
@@ -143,10 +144,10 @@ public class BuscaRelato implements Parcelable {
             out.writeLong(getData().getTime());
         }
         if (status != null) {
-            out.writeByte(getStatus().getValor());
+            out.writeString(getStatus());
         }
         if (classificacao != null) {
-            out.writeByte(getClassificacao().getValor());
+            out.writeString(getClassificacao());
         }
         if (foto != null) {
             boolean foto[] = {getFoto()};
@@ -169,13 +170,13 @@ public class BuscaRelato implements Parcelable {
             params.put("autor", getAutor());
         }
         if (data != null) {
-            params.put("data", getData().toString());
+            params.put("data", UtilConvert.fromDate(getData()));
         }
         if (status != null) {
-            params.put("status", getStatus().toString());
+            params.put("status", getStatus());
         }
         if (classificacao != null) {
-            params.put("classificacao", getClassificacao().toString());
+            params.put("classificacao", getClassificacao());
         }
         if (foto != null) {
             params.put("foto", getFoto().toString());
