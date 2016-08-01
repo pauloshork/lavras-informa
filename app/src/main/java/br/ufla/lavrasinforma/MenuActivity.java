@@ -60,8 +60,8 @@ public class MenuActivity extends AppCompatActivity {
     }
 
     public void mapaRelatos(View view) {
-        Toast.makeText(this, "TODO Criar tela de mapa de relatos", Toast.LENGTH_LONG).show();
-        // TODO Criar tela de mapa de relatos
+        Intent mapa = new Intent(this, MapaActivity.class);
+        startActivity(mapa);
     }
 
     public void logout(View view) {
