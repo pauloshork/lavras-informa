@@ -110,7 +110,7 @@ public class RelatoActivity extends AppCompatActivity {
             txtClassificacao.setSelection(UtilConvert.positionFromClassificacao(relato.getClassificacao()));
             txtStatus.setSelection(UtilConvert.positionFromStatus(relato.getStatus()));
 
-            if (relato.getLatitude() != 0.0 && relato.getLongitude() != 0.0) {
+            if (relato.getLatitude() != null && relato.getLongitude() != null) {
                 txtLocalizacao.setText("Lat: " + relato.getLatitude() + " Lon: " + relato.getLongitude());
             } else {
                 txtLocalizacao.setText("Sem localização definida");
@@ -296,10 +296,10 @@ public class RelatoActivity extends AppCompatActivity {
         relato.setFoto(relato.getFoto() || relato.getDadosFoto() != null);
 
         getIntent().putExtra(EXTRA_RELATO, relato);
-        if (relato.getLatitude() != 0.0 && relato.getLongitude() != 0.0) {
+        if (relato.getLatitude() != null && relato.getLongitude() != null) {
             relatarWeb();
         } else {
-            Toast.makeText(this, "Você deve fornecer a localização no relato.", Toast.LENGTH_LONG);
+            Toast.makeText(this, "Você deve fornecer a localização no relato.", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -330,8 +330,11 @@ public class RelatoActivity extends AppCompatActivity {
     }
 
     private void localizar() {
+        String gpsProvider = LocationManager.GPS_PROVIDER;
+        String netProvider = LocationManager.NETWORK_PROVIDER;
+
         final LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+        if (!locationManager.isProviderEnabled(gpsProvider) && !locationManager.isProviderEnabled(netProvider)) {
             ativarGps();
         } else {
             final ProgressDialog dialog = new ProgressDialog(this);
@@ -379,7 +382,12 @@ public class RelatoActivity extends AppCompatActivity {
                 }
             });
             dialog.show();
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+            if (locationManager.isProviderEnabled(gpsProvider)) {
+                locationManager.requestLocationUpdates(gpsProvider, 0, 0, locationListener);
+            }
+            if (locationManager.isProviderEnabled(netProvider)) {
+                locationManager.requestLocationUpdates(netProvider, 0, 0, locationListener);
+            }
         }
     }
 

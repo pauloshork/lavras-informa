@@ -28,8 +28,8 @@ public class Relato implements Parcelable{
     private String classificacao;
     private Bitmap dados_foto;
     private boolean foto;
-    private double latitude;
-    private double longitude;
+    private Double latitude;
+    private Double longitude;
     private String nome_usuario;
 
     public Integer getId() {
@@ -104,19 +104,19 @@ public class Relato implements Parcelable{
         this.dados_foto = dadosFoto;
     }
 
-    public double getLatitude() {
+    public Double getLatitude() {
         return latitude;
     }
 
-    public void setLatitude(double latitude) {
+    public void setLatitude(Double latitude) {
         this.latitude = latitude;
     }
 
-    public double getLongitude() {
+    public Double getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(double longitude) {
+    public void setLongitude(Double longitude) {
         this.longitude = longitude;
     }
 
@@ -161,8 +161,13 @@ public class Relato implements Parcelable{
             }
 
             relato.setFoto(parcel.createBooleanArray()[0]);
-            relato.setLatitude(parcel.readDouble());
-            relato.setLongitude(parcel.readDouble());
+
+            if (nulls.isNextNotNull()) {
+                relato.setLatitude(parcel.readDouble());
+            }
+            if (nulls.isNextNotNull()) {
+                relato.setLongitude(parcel.readDouble());
+            }
 
             if (nulls.isNextNotNull()) {
                 relato.setNomeUsuario(parcel.readString());
@@ -183,7 +188,7 @@ public class Relato implements Parcelable{
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
-        UtilNulls nulls = new UtilNulls(id, id_usuario, data, titulo, dados_foto, nome_usuario);
+        UtilNulls nulls = new UtilNulls(id, id_usuario, data, titulo, dados_foto, latitude, longitude, nome_usuario);
         parcel.writeParcelable(nulls, i);
 
         if (getId() != null) {
@@ -244,8 +249,8 @@ public class Relato implements Parcelable{
         }
 
         params.put("foto", String.valueOf(getFoto() ? 1 : 0));
-        params.put("latitude", String.valueOf(getLatitude()));
-        params.put("longitude", String.valueOf(getLongitude()));
+        params.put("latitude", getLatitude().toString());
+        params.put("longitude", getLongitude().toString());
 
         return params;
     }
